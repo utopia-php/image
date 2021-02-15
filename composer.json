@@ -1,5 +1,5 @@
 {
-    "name": "utopia-php/resize",
+    "name": "utopia-php/imageresize",
     "description": "A simple Image manipulation library",
     "type": "library",
     "keywords": ["php","framework","upf","utopia","resize"],
