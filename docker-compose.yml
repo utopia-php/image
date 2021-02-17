@@ -5,4 +5,9 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile-php7
+
+  php8:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-php8
   
