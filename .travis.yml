@@ -22,7 +22,6 @@ before_install:
 - sudo service docker start
 - docker --version
 - docker buildx create --use
-- chmod -R u+x ./.travis-ci
 
 install:
 - docker-compose build
