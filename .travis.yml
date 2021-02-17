@@ -1,22 +1,31 @@
-language: php
+dist: xenial
 
-php:
-- 7.4
-- 8.0
-- nightly
+arch:
+  - amd64
+
+os: linux
+
+language: shell
 
 notifications:
   email:
   - team@appwrite.io
 
-before_install:
-- sudo apt-get update
-- sudo apt-get install webp
+services:
+- docker
 
-before_script:
-- yes | pecl install imagick
-- composer install --ignore-platform-reqs
+before_install:
+- curl -fsSL https://get.docker.com | sh
+- echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+- mkdir -p $HOME/.docker
+- echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+- sudo service docker start
+- docker --version
+- docker buildx create --use
+- chmod -R u+x ./.travis-ci
+
+install:
+- docker-compose build
 
 script:
-- vendor/bin/phpunit --configuration phpunit.xml
-- vendor/bin/psalm --show-info=true
+- docker-compose up
