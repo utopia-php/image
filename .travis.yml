@@ -9,6 +9,10 @@ notifications:
   email:
   - team@appwrite.io
 
+before_install:
+- sudo apt-get update
+- sudo apt-get install webp
+
 before_script:
 - yes | pecl install imagick
 - composer install --ignore-platform-reqs
