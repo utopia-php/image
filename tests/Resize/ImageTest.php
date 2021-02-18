@@ -2,10 +2,10 @@
 
 namespace Appwrite\Tests;
 
-use Utopia\Resize\Resize;
+use Utopia\Image\Image;
 use PHPUnit\Framework\TestCase;
 
-class ResizeTest extends TestCase
+class ImageTest extends TestCase
 {
     public function setUp(): void
     {
@@ -17,12 +17,12 @@ class ResizeTest extends TestCase
 
     public function testCrop100x100()
     {
-        $resize = new Resize(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
         $target = __DIR__.'/100x100.jpg';
 
-        $resize->crop(100, 100);
+        $image->crop(100, 100);
 
-        $resize->save($target, 'jpg', 100);
+        $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertNotEmpty(\md5(\file_get_contents($target)));
@@ -37,12 +37,12 @@ class ResizeTest extends TestCase
 
     public function testCrop100x400()
     {
-        $resize = new Resize(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
         $target = __DIR__.'/100x400.jpg';
 
-        $resize->crop(100, 400);
+        $image->crop(100, 400);
 
-        $resize->save($target, 'jpg', 100);
+        $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertNotEmpty(\md5(\file_get_contents($target)));
@@ -57,12 +57,12 @@ class ResizeTest extends TestCase
 
     public function testCrop400x100()
     {
-        $resize = new Resize(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
         $target = __DIR__.'/400x100.jpg';
 
-        $resize->crop(400, 100);
+        $image->crop(400, 100);
 
-        $resize->save($target, 'jpg', 100);
+        $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertNotEmpty(\md5(\file_get_contents($target)));
@@ -77,13 +77,13 @@ class ResizeTest extends TestCase
 
     public function testCrop100x100WEBP()
     {
-        $resize = new Resize(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
         $target = __DIR__.'/100x100.webp';
         $original = __DIR__.'/../resources/resize/100x100.webp';
 
-        $resize->crop(100, 100);
+        $image->crop(100, 100);
 
-        $resize->save($target, 'webp', 100);
+        $image->save($target, 'webp', 100);
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertNotEmpty(\md5(\file_get_contents($target)));
@@ -99,13 +99,13 @@ class ResizeTest extends TestCase
 
     public function testCrop100x100PNG()
     {
-        $resize = new Resize(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
         $target = __DIR__.'/100x100.png';
         $original = __DIR__.'/../resources/resize/100x100.png';
 
-        $resize->crop(100, 100);
+        $image->crop(100, 100);
 
-        $resize->save($target, 'png', 100);
+        $image->save($target, 'png', 100);
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertGreaterThan(15000, \filesize($target));
@@ -123,13 +123,13 @@ class ResizeTest extends TestCase
 
     public function testCrop100x100PNGQuality30()
     {
-        $resize = new Resize(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
         $target = __DIR__.'/100x100-q30.jpg';
         $original = __DIR__.'/../resources/resize/100x100-q30.jpg';
 
-        $resize->crop(100, 100);
+        $image->crop(100, 100);
 
-        $resize->save($target, 'jpg', 10);
+        $image->save($target, 'jpg', 10);
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertGreaterThan(500, \filesize($target));
@@ -147,13 +147,13 @@ class ResizeTest extends TestCase
 
     public function testCrop100x100GIF()
     {
-        $resize = new Resize(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-3.gif'));
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-3.gif'));
         $target = __DIR__.'/100x100.gif';
         $original = __DIR__.'/../resources/resize/100x100.gif';
 
-        $resize->crop(100, 100);
+        $image->crop(100, 100);
 
-        $resize->save($target, 'gif', 100);
+        $image->save($target, 'gif', 100);
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertGreaterThan(400000, \filesize($target));

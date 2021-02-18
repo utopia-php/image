@@ -1,11 +1,11 @@
 <?php
 
-namespace Utopia\Resize;
+namespace Utopia\Image;
 
 use Exception;
 use Imagick;
 
-class Resize
+class Image
 {
     private $image;
 
