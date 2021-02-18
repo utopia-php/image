@@ -7,11 +7,11 @@ use Imagick;
 
 class Image
 {
-    private $image;
+    private Imagick $image;
 
-    private $width;
+    private int $width;
 
-    private $height;
+    private int $height;
 
     /**
      * @param string $data
@@ -32,7 +32,7 @@ class Image
      * @param int $width
      * @param int $height
      *
-     * @return Resize
+     * @return Image
      *
      * @throws \Throwable
      */
@@ -41,11 +41,11 @@ class Image
         $originalAspect = $this->width / $this->height;
 
         if (empty($width)) {
-            $width = $height * $originalAspect;
+            $width = intval($height * $originalAspect);
         }
 
         if (empty($height)) {
-            $height = $width / $originalAspect;
+            $height = intval($width / $originalAspect);
         }
 
         if (empty($height) && empty($width)) {
@@ -69,9 +69,9 @@ class Image
     }
 
     /**
-     * @param $color
+     * @param mixed $color
      *
-     * @return Resize
+     * @return Image
      *
      * @throws \Throwable
      */
@@ -91,7 +91,7 @@ class Image
      * @param string $type
      * @param int    $quality
      *
-     * @return string
+     * @return false|null|string
      *
      * @throws Exception
      */
@@ -105,7 +105,7 @@ class Image
      * @param $type
      * @param int $quality
      *
-     * @return string
+     * @return false|null|string
      *
      * @throws Exception
      */
@@ -170,7 +170,7 @@ class Image
                 $scaleQuality = \round(($quality / 100) * 9);
 
                 /* Invert quality setting as 0 is best, not 9 */
-                $invertScaleQuality = 9 - $scaleQuality;
+                $invertScaleQuality = intval(9 - $scaleQuality);
 
                 $this->image->setImageCompressionQuality($invertScaleQuality);
 
@@ -202,7 +202,7 @@ class Image
         $ratio = $this->width / $this->height;
         $newWidth = $newHeight * $ratio;
 
-        return $newWidth;
+        return intval($newWidth);
     }
 
     /**
@@ -215,6 +215,6 @@ class Image
         $ratio = $this->height / $this->width;
         $newHeight = $newWidth * $ratio;
 
-        return $newHeight;
+        return intval($newHeight);
     }
 }
