@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  php7.4:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-php7
+
+  php8:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-php8
+  
