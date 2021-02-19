@@ -4,6 +4,8 @@ namespace Utopia\Image;
 
 use Exception;
 use Imagick;
+use ImagickDraw;
+use ImagickPixel;
 
 class Image
 {
@@ -67,6 +69,92 @@ class Image
 
         return $this;
     }
+
+    /**
+     * @param integer $borderWidth The size of the border in pixels
+     * @param string $borderColor The color of the border in hex format
+     * 
+     * @return Image
+     *
+     * @throws \ImagickException
+     */
+    public function setBorder(int $borderWidth, string $borderColor): self
+    {
+        $width = $height = $borderWidth;
+
+        $this->image->borderImage($borderColor, $width, $height);
+
+        return $this;
+    }
+
+    /**
+      * Applies rounded corners, borders and background to an image
+      * @param integer $cornerRadius: The radius for the corners
+      * @param string $borderColor: A valid HEX string representing the border color
+      * @param integer $borderWidth: An integer representing the broder size in pixels
+      * @param string $background: A valid HEX string representing the background color
+      * @return Image $image: The processed image
+      *
+      * @throws \ImagickException
+      */
+      public function setBorderRadius(int $cornerRadius): self
+      {
+          $mask = new Imagick(); // create mask image
+          $mask->newImage($this->width, $this->height, new ImagickPixel('transparent'), 'png');
+          
+          $shape1 = new ImagickDraw(); // create the rounded rectangle
+          $shape1->setFillColor(new ImagickPixel('black'));
+          $shape1->roundRectangle(0, 0, $this->width, $this->height, $cornerRadius, $cornerRadius);
+          
+          $shape2 = new ImagickDraw(); // create the rounded rectangle
+          $shape2->setFillColor(new ImagickPixel('black'));
+          $shape2->roundRectangle(0, 20, $this->width, $this->height, $cornerRadius, $cornerRadius);
+          
+          $mask->drawImage($shape1); // draw the rectangle
+          $mask->drawImage($shape2); // draw the rectangle
+          
+          // apply mask
+          $this->image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
+          
+          return $this;
+      }
+ 
+      /**
+     * @param float opacity The opacity of the image
+     * 
+     * @return Image
+     *
+     * @throws \ImagickException
+     */
+    public function setOpacity(float $opacity): self
+    {
+        if(empty($opacity) || $opacity == 1) {
+            return $this;
+        }
+
+        $this->image->evaluateImage(Imagick::EVALUATE_MULTIPLY, $opacity, Imagick::CHANNEL_ALPHA);
+
+        return $this;
+    }
+
+    /**
+     * Rotates an image to $degree degree
+     * @param integer $degree: The amount to rotate in degrees
+     * @return Image $image: The rotated image
+     *
+     * @throws \ImagickException
+     */
+    public function setRotation(int $degree): self
+    {
+        if (empty($degree) || $degree == 0) {
+            return $this;
+        }
+        
+        $this->image->rotateImage('transparent', $degree);
+        
+        return $this;
+    }
+
 
     /**
      * @param mixed $color
