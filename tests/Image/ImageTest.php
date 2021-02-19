@@ -167,4 +167,82 @@ class ImageTest extends TestCase
         $this->assertEquals('GIF', $image->getImageFormat());
         \unlink($target);
     }
+
+    public function testBorder5Red()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/border_5_red.jpg';
+        $original = __DIR__.'/../resources/resize/border_5_red.jpg';
+
+        $image->setBorder(5, "#ff0000");
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals('JPEG', $image->getImageFormat());
+        \unlink($target);
+    }
+
+    public function testRotate45()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/rotate_45.jpg';
+        $original = __DIR__.'/../resources/resize/rotate_45.jpg';
+
+        $image->setRotation(45);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals('JPEG', $image->getImageFormat());
+        \unlink($target);
+    }
+
+    public function testOpacity02()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/opacity_0.2.png';
+        $original = __DIR__.'/../resources/resize/opacity_0.2.png';
+
+        $image->setOpacity(0.2);
+
+        $image->save($target, 'png', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals('PNG', $image->getImageFormat());
+        \unlink($target);
+    }
+
+    public function testBorderRadius500()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/border_radius_500.png';
+        $original = __DIR__.'/../resources/resize/border_radius_500.png';
+
+        $image->setBorderRadius(500);
+
+        $image->save($target, 'png', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals('PNG', $image->getImageFormat());
+        \unlink($target);
+    }
+
+    
 }
