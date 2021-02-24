@@ -264,5 +264,25 @@ class ImageTest extends TestCase
         \unlink($target);
     }
 
+    public function testCrop100BR50()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/100x100_BR_50.png';
+        $original = __DIR__.'/../resources/resize/100x100_BR_50.png';
+
+        $image->crop(100,100);
+        $image->setOpacity(0.5);
+
+        $image->save($target, 'png', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals('PNG', $image->getImageFormat());
+        \unlink($target);
+    }
+
     
 }

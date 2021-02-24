@@ -66,7 +66,8 @@ class Image
         } else {
             $this->image->cropThumbnailImage($width, $height);
         }
-
+        $this->height = $height;
+        $this->width = $width;
         return $this;
     }
 
