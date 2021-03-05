@@ -203,6 +203,8 @@ class ImageTest extends TestCase
 
         $image = new \Imagick($target);
         $this->assertEquals('JPEG', $image->getImageFormat());
+        $this->assertEquals($image->getImageHeight(), 2658);
+        $this->assertEquals($image->getImageWidth(), 2659);
         \unlink($target);
     }
 
@@ -260,6 +262,8 @@ class ImageTest extends TestCase
         $this->assertNotEmpty(\md5(\file_get_contents($target)));
 
         $image = new \Imagick($target);
+        $this->assertEquals($image->getImageWidth(), 100);
+        $this->assertEquals($image->getImageHeight(), 100);
         $this->assertEquals('PNG', $image->getImageFormat());
         \unlink($target);
     }
