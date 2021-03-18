@@ -20,10 +20,24 @@ composer require utopia-php/image
 require_once '../vendor/autoload.php';
 
 use Utopia\Image\Image;
+
+//crop image
 $image = new Image(\file_get_contents('image.jpg'));
 $target = 'image_100x100.jpg';
 $image->crop(100, 100);
 $image->save($target, 'jpg', 100);
+
+$image = new Image(\file_get_contents('image.jpg'));
+$target = 'image_border.jpg';
+$image->setBorder(2, "#ff0000"); //add border 2 px, red
+$image->setRotation(45); //rotate 45 degree
+$image->save($target, 'jpg', 100);
+
+
+$image = new Image(\file_get_contents('image.jpg'));
+$target = 'image_border.jpg';
+$image->setOpacity(0.2); //set opacity
+$image->save($target, 'png', 100);
 
 ```
 
