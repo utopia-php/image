@@ -90,7 +90,6 @@ class Image
         $this->borderWidth = $borderWidth;
         $this->borderColor = $borderColor;
         
-        // if cornerRadius is set, border is handled in the setBorderRadius functions
         if(!empty($this->cornerRadius)) return $this;
         $this->image->borderImage($borderColor, $borderWidth, $borderWidth);
 
@@ -127,11 +126,16 @@ class Image
 
             $strokeCanvas = new Imagick();
             $strokeCanvas->newImage($this->width, $this->height, new ImagickPixel('transparent'),'png');
+
             $shape2 = new ImagickDraw();
-            $shape2->setFillColor($bc);
-            $shape2->roundRectangle(0,0,$this->width, $this->height, $cornerRadius, $cornerRadius);
+            $shape2->setFillColor(new ImagickPixel('transparent'));
+            $shape2->setStrokeWidth($this->borderWidth);
+            $shape2->setStrokeColor($bc);
+            $shape2->roundRectangle($this->borderWidth, $this->borderWidth, $rectwidth, $rectheight, $cornerRadius, $cornerRadius);
+            
             $strokeCanvas->drawImage($shape2);
             $strokeCanvas->compositeImage($this->image, Imagick::COMPOSITE_DEFAULT, 0,0);
+            
             $this->image = $strokeCanvas;
         }
         return $this;
