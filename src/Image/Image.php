@@ -15,6 +15,12 @@ class Image
 
     private int $height;
 
+    private int $cornerRadius = 0;
+
+    private int $borderWidth = 0;
+
+    private String $borderColor = '';
+
     /**
      * @param string $data
      *
@@ -81,9 +87,12 @@ class Image
      */
     public function setBorder(int $borderWidth, string $borderColor): self
     {
-        $width = $height = $borderWidth;
-
-        $this->image->borderImage($borderColor, $width, $height);
+        $this->borderWidth = $borderWidth;
+        $this->borderColor = $borderColor;
+        
+        // if cornerRadius is set, border is handled in the setBorderRadius functions
+        if(!empty($this->cornerRadius)) return $this;
+        $this->image->borderImage($borderColor, $borderWidth, $borderWidth);
 
         return $this;
     }
@@ -101,13 +110,30 @@ class Image
         $mask = new Imagick();
         $mask->newImage($this->width, $this->height, new ImagickPixel('transparent'), 'png');
 
+        $rectwidth = ($this->borderWidth>0?($this->width-($this->borderWidth+1)):$this->width-1);
+		$rectheight = ($this->borderWidth>0?($this->height-($this->borderWidth+1)):$this->height-1);
+ 
+
         $shape = new ImagickDraw();
         $shape->setFillColor(new ImagickPixel('black'));
-        $shape->roundRectangle(0, 0, $this->width, $this->height, $cornerRadius, $cornerRadius);
-
+        $shape->roundRectangle($this->borderWidth, $this->borderWidth, $rectwidth, $rectheight, $cornerRadius, $cornerRadius);
+        
         $mask->drawImage($shape);
+        $this->image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
 
-        $this->image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0); 
+        if($this->borderWidth > 0) {
+            $bc = new ImagickPixel();
+            $bc->setColor($this->borderColor);
+
+            $strokeCanvas = new Imagick();
+            $strokeCanvas->newImage($this->width, $this->height, new ImagickPixel('transparent'),'png');
+            $shape2 = new ImagickDraw();
+            $shape2->setFillColor($bc);
+            $shape2->roundRectangle(0,0,$this->width, $this->height, $cornerRadius, $cornerRadius);
+            $strokeCanvas->drawImage($shape2);
+            $strokeCanvas->compositeImage($this->image, Imagick::COMPOSITE_DEFAULT, 0,0);
+            $this->image = $strokeCanvas;
+        }
         return $this;
       }
  
