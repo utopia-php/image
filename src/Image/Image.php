@@ -150,7 +150,7 @@ class Image
      */
     public function setOpacity(float $opacity): self
     {
-        if(empty($opacity) || $opacity == 1) {
+        if((empty($opacity) && $opacity !== 0) || $opacity == 1) {
             return $this;
         }
         $this->image->setImageAlpha($opacity);
