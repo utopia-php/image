@@ -73,7 +73,7 @@ class Image
 
         $resizeWidth = $this->width;
         $resizeHeight = $this->height;
-        if ($gravity !== Imagick::GRAVITY_CENTER) {
+        if ($gravity !== Image::GRAVITY_CENTER) {
             if ($width > $height) {
                 $resizeWidth = $width;
                 $resizeHeight = intval($width * $originalAspect);
