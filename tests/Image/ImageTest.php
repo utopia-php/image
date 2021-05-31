@@ -2,6 +2,7 @@
 
 namespace Appwrite\Tests;
 
+use Imagick;
 use Utopia\Image\Image;
 use PHPUnit\Framework\TestCase;
 
@@ -29,6 +30,26 @@ class ImageTest extends TestCase
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('JPEG', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravity()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/50x100_NW.jpg';
+
+        $image->crop(50, 100, Imagick::GRAVITY_NORTHWEST);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(50, $image->getImageWidth());
         $this->assertEquals(100, $image->getImageHeight());
         $this->assertEquals('JPEG', $image->getImageFormat());
 
