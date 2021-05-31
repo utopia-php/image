@@ -36,21 +36,22 @@ class ImageTest extends TestCase
         \unlink($target);
     }
 
-    public function testCropGravity()
+    public function testCropGravityNW()
     {
         $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
-        $target = __DIR__.'/50x100_NW.jpg';
+        $target = __DIR__.'/NW.jpg';
+        $original = __DIR__.'/../resources/resize/NW.jpg';
 
-        $image->crop(50, 100, Imagick::GRAVITY_NORTHWEST);
+        $image->crop(50, 200, Imagick::GRAVITY_NORTHWEST);
 
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
 
         $image = new \Imagick($target);
         $this->assertEquals(50, $image->getImageWidth());
-        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals(200, $image->getImageHeight());
         $this->assertEquals('JPEG', $image->getImageFormat());
 
         \unlink($target);

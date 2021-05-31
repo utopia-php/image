@@ -9,6 +9,16 @@ use ImagickPixel;
 
 class Image
 {
+    const GRAVITY_CENTER = 0;
+    const GRAVITY_NORTHWEST = 1;
+    const GRAVITY_NORTH = 2;
+    const GRAVITY_NORTHEAST = 3;
+    const GRAVITY_WEST = 4;
+    const GRAVITY_EAST = 5;
+    const GRAVITY_SOUTHWEST = 6;
+    const GRAVITY_SOUTH = 7;
+    const GRAVITY_SOUTHEAST = 8;
+
     private Imagick $image;
 
     private int $width;
@@ -44,7 +54,7 @@ class Image
      *
      * @throws \Throwable
      */
-    public function crop(int $width, int $height, int $gravity = Imagick::GRAVITY_CENTER)
+    public function crop(int $width, int $height, int $gravity = Image::GRAVITY_CENTER)
     {
         $originalAspect = $this->width / $this->height;
 
@@ -75,31 +85,31 @@ class Image
 
         $x = $y = 0;
         switch ($gravity) {
-            case Imagick::GRAVITY_NORTHWEST:
+            case Image::GRAVITY_NORTHWEST:
                 $x = 0;
                 $y = 0;
-            case Imagick::GRAVITY_NORTH:
+            case Image::GRAVITY_NORTH:
                 $x = ($resizeWidth / 2) - ($width / 2);
                 break;
-            case Imagick::GRAVITY_NORTHEAST:
+            case Image::GRAVITY_NORTHEAST:
                 $x = $resizeWidth - $width;
                 break;
-            case Imagick::GRAVITY_WEST:
+            case Image::GRAVITY_WEST:
                 $y = ($resizeHeight / 2) - ($height / 2);
                 break;
-            case Imagick::GRAVITY_EAST:
+            case Image::GRAVITY_EAST:
                 $x = $resizeWidth - $width;
                 $y = ($resizeHeight / 2) - ($height / 2);
                 break;
-            case Imagick::GRAVITY_SOUTHWEST:
+            case Image::GRAVITY_SOUTHWEST:
                 $x = 0;
                 $y = $resizeHeight - $height;
                 break;
-            case Imagick::GRAVITY_SOUTH:
+            case Image::GRAVITY_SOUTH:
                 $x = ($resizeWidth / 2) - ($width / 2);
                 $y = $resizeHeight - $height;
                 break;
-            case Imagick::GRAVITY_SOUTHEAST:
+            case Image::GRAVITY_SOUTHEAST:
                 $x = $resizeWidth - $width;
                 $y = $resizeHeight - $height;
                 break;
@@ -115,7 +125,7 @@ class Image
             $this->image = $this->image->coalesceImages();
 
             foreach ($this->image as $frame) {
-                if ($gravity === Imagick::GRAVITY_CENTER) {
+                if ($gravity === Image::GRAVITY_CENTER) {
                     $frame->cropThumbnailImage($width, $height);
                 } else {
                     $frame->scaleImage($resizeWidth, $resizeHeight, false);
@@ -127,7 +137,7 @@ class Image
             $this->image->deconstructImages();
         } else {
             foreach ($this->image as $frame) {
-                if ($gravity === Imagick::GRAVITY_CENTER) {
+                if ($gravity === Image::GRAVITY_CENTER) {
                     $this->image->cropThumbnailImage($width, $height);
                 } else {
                     $this->image->scaleImage($resizeWidth, $resizeHeight, false);
