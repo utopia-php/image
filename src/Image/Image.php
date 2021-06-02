@@ -85,31 +85,31 @@ class Image
 
         $x = $y = 0;
         switch ($gravity) {
-            case Image::GRAVITY_NORTHWEST:
+            case self::GRAVITY_NORTHWEST:
                 $x = 0;
                 $y = 0;
-            case Image::GRAVITY_NORTH:
+            case self::GRAVITY_NORTH:
                 $x = ($resizeWidth / 2) - ($width / 2);
                 break;
-            case Image::GRAVITY_NORTHEAST:
+            case self::GRAVITY_NORTHEAST:
                 $x = $resizeWidth - $width;
                 break;
-            case Image::GRAVITY_WEST:
+            case self::GRAVITY_WEST:
                 $y = ($resizeHeight / 2) - ($height / 2);
                 break;
-            case Image::GRAVITY_EAST:
+            case self::GRAVITY_EAST:
                 $x = $resizeWidth - $width;
                 $y = ($resizeHeight / 2) - ($height / 2);
                 break;
-            case Image::GRAVITY_SOUTHWEST:
+            case self::GRAVITY_SOUTHWEST:
                 $x = 0;
                 $y = $resizeHeight - $height;
                 break;
-            case Image::GRAVITY_SOUTH:
+            case self::GRAVITY_SOUTH:
                 $x = ($resizeWidth / 2) - ($width / 2);
                 $y = $resizeHeight - $height;
                 break;
-            case Image::GRAVITY_SOUTHEAST:
+            case self::GRAVITY_SOUTHEAST:
                 $x = $resizeWidth - $width;
                 $y = $resizeHeight - $height;
                 break;
@@ -125,7 +125,7 @@ class Image
             $this->image = $this->image->coalesceImages();
 
             foreach ($this->image as $frame) {
-                if ($gravity === Image::GRAVITY_CENTER) {
+                if ($gravity === self::GRAVITY_CENTER) {
                     $frame->cropThumbnailImage($width, $height);
                 } else {
                     $frame->scaleImage($resizeWidth, $resizeHeight, false);
@@ -137,7 +137,7 @@ class Image
             $this->image->deconstructImages();
         } else {
             foreach ($this->image as $frame) {
-                if ($gravity === Image::GRAVITY_CENTER) {
+                if ($gravity === self::GRAVITY_CENTER) {
                     $this->image->cropThumbnailImage($width, $height);
                 } else {
                     $this->image->scaleImage($resizeWidth, $resizeHeight, false);
