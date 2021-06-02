@@ -24,7 +24,7 @@ use Utopia\Image\Image;
 //crop image
 $image = new Image(\file_get_contents('image.jpg'));
 $target = 'image_100x100.jpg';
-$image->crop(100, 100);
+$image->crop(100, 100, Image::GRAVITY_NORTHWEST);
 $image->save($target, 'jpg', 100);
 
 $image = new Image(\file_get_contents('image.jpg'));
