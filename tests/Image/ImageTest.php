@@ -2,6 +2,7 @@
 
 namespace Appwrite\Tests;
 
+use Imagick;
 use Utopia\Image\Image;
 use PHPUnit\Framework\TestCase;
 
@@ -30,6 +31,195 @@ class ImageTest extends TestCase
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
         $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('JPEG', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravityNW()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/NW.jpg';
+        $original = __DIR__.'/../resources/resize/NW.jpg';
+
+        $image->crop(50, 200, Image::GRAVITY_NORTHWEST);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(50, $image->getImageWidth());
+        $this->assertEquals(200, $image->getImageHeight());
+        $this->assertEquals('JPEG', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravityN()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-3.gif'));
+        $target = __DIR__.'/N.gif';
+        $original = __DIR__.'/../resources/resize/N.gif';
+
+        $image->crop(100, 50, Image::GRAVITY_NORTH);
+
+        $image->save($target, 'gif', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(50, $image->getImageHeight());
+        $this->assertEquals('GIF', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravityNE()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/NE.jpg';
+        $original = __DIR__.'/../resources/resize/NE.jpg';
+
+        $image->crop(50, 200, Image::GRAVITY_NORTHEAST);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(50, $image->getImageWidth());
+        $this->assertEquals(200, $image->getImageHeight());
+        $this->assertEquals('JPEG', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravitySW()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/SW.jpg';
+        $original = __DIR__.'/../resources/resize/SW.jpg';
+
+        $image->crop(50, 200, Image::GRAVITY_SOUTHWEST);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(50, $image->getImageWidth());
+        $this->assertEquals(200, $image->getImageHeight());
+        $this->assertEquals('JPEG', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravityS()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-3.gif'));
+        $target = __DIR__.'/S.gif';
+        $original = __DIR__.'/../resources/resize/S.gif';
+
+        $image->crop(100, 50, Image::GRAVITY_SOUTH);
+
+        $image->save($target, 'gif', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(50, $image->getImageHeight());
+        $this->assertEquals('GIF', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravitySE()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/SE.jpg';
+        $original = __DIR__.'/../resources/resize/SE.jpg';
+
+        $image->crop(50, 200, Image::GRAVITY_SOUTHEAST);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(50, $image->getImageWidth());
+        $this->assertEquals(200, $image->getImageHeight());
+        $this->assertEquals('JPEG', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravityC()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/C.jpg';
+        $original = __DIR__.'/../resources/resize/C.jpg';
+
+        $image->crop(150, 200, Image::GRAVITY_CENTER);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(150, $image->getImageWidth());
+        $this->assertEquals(200, $image->getImageHeight());
+        $this->assertEquals('JPEG', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravityW()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-3.gif'));
+        $target = __DIR__.'/W.gif';
+        $original = __DIR__.'/../resources/resize/W.gif';
+
+        $image->crop(50, 100, Image::GRAVITY_WEST);
+
+        $image->save($target, 'gif', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(50, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('GIF', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCropGravityE()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $target = __DIR__.'/E.jpg';
+        $original = __DIR__.'/../resources/resize/E.jpg';
+
+        $image->crop(50, 200, Image::GRAVITY_EAST);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(50, $image->getImageWidth());
+        $this->assertEquals(200, $image->getImageHeight());
         $this->assertEquals('JPEG', $image->getImageFormat());
 
         \unlink($target);

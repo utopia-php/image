@@ -9,6 +9,16 @@ use ImagickPixel;
 
 class Image
 {
+    const GRAVITY_CENTER = 0;
+    const GRAVITY_NORTHWEST = 1;
+    const GRAVITY_NORTH = 2;
+    const GRAVITY_NORTHEAST = 3;
+    const GRAVITY_WEST = 4;
+    const GRAVITY_EAST = 5;
+    const GRAVITY_SOUTHWEST = 6;
+    const GRAVITY_SOUTH = 7;
+    const GRAVITY_SOUTHEAST = 8;
+
     private Imagick $image;
 
     private int $width;
@@ -39,12 +49,12 @@ class Image
     /**
      * @param int $width
      * @param int $height
-     *
+     * @param int $gravity
      * @return Image
      *
      * @throws \Throwable
      */
-    public function crop(int $width, int $height)
+    public function crop(int $width, int $height, int $gravity = Image::GRAVITY_CENTER)
     {
         $originalAspect = $this->width / $this->height;
 
@@ -61,19 +71,83 @@ class Image
             $width = $this->width;
         }
 
+        $resizeWidth = $this->width;
+        $resizeHeight = $this->height;
+        if ($gravity !== Image::GRAVITY_CENTER) {
+            if ($width > $height) {
+                $resizeWidth = $width;
+                $resizeHeight = intval($width * $originalAspect);
+            } else {
+                $resizeWidth = intval($height * $originalAspect);
+                $resizeHeight = $height;
+            }
+        }
+
+        $x = $y = 0;
+        switch ($gravity) {
+            case self::GRAVITY_NORTHWEST:
+                $x = 0;
+                $y = 0;
+            case self::GRAVITY_NORTH:
+                $x = ($resizeWidth / 2) - ($width / 2);
+                break;
+            case self::GRAVITY_NORTHEAST:
+                $x = $resizeWidth - $width;
+                break;
+            case self::GRAVITY_WEST:
+                $y = ($resizeHeight / 2) - ($height / 2);
+                break;
+            case self::GRAVITY_EAST:
+                $x = $resizeWidth - $width;
+                $y = ($resizeHeight / 2) - ($height / 2);
+                break;
+            case self::GRAVITY_SOUTHWEST:
+                $x = 0;
+                $y = $resizeHeight - $height;
+                break;
+            case self::GRAVITY_SOUTH:
+                $x = ($resizeWidth / 2) - ($width / 2);
+                $y = $resizeHeight - $height;
+                break;
+            case self::GRAVITY_SOUTHEAST:
+                $x = $resizeWidth - $width;
+                $y = $resizeHeight - $height;
+                break;
+            default:
+                $x = ($resizeWidth / 2) - ($width / 2);
+                $y = ($resizeHeight / 2) - ($height / 2);
+                break;
+        }
+        $x = intval($x);
+        $y = intval($y);
+
         if ($this->image->getImageFormat() == 'GIF') {
             $this->image = $this->image->coalesceImages();
 
             foreach ($this->image as $frame) {
-                $frame->cropThumbnailImage($width, $height);
+                if ($gravity === self::GRAVITY_CENTER) {
+                    $frame->cropThumbnailImage($width, $height);
+                } else {
+                    $frame->scaleImage($resizeWidth, $resizeHeight, false);
+                    $frame->cropImage($width, $height, $x, $y);
+                    $frame->thumbnailImage($width, $height);
+                }
             }
 
             $this->image->deconstructImages();
         } else {
-            $this->image->cropThumbnailImage($width, $height);
+            foreach ($this->image as $frame) {
+                if ($gravity === self::GRAVITY_CENTER) {
+                    $this->image->cropThumbnailImage($width, $height);
+                } else {
+                    $this->image->scaleImage($resizeWidth, $resizeHeight, false);
+                    $this->image->cropImage($width, $height, $x, $y);
+                }
+            }
         }
         $this->height = $height;
         $this->width = $width;
+
         return $this;
     }
 
@@ -150,7 +224,7 @@ class Image
      */
     public function setOpacity(float $opacity): self
     {
-        if((empty($opacity) && $opacity !== 0) || $opacity == 1) {
+        if((empty($opacity) && $opacity != 0) || $opacity == 1) {
             return $this;
         }
         $this->image->setImageAlpha($opacity);
