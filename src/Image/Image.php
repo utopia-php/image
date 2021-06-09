@@ -9,15 +9,15 @@ use ImagickPixel;
 
 class Image
 {
-    const GRAVITY_CENTER = 0;
-    const GRAVITY_NORTHWEST = 1;
-    const GRAVITY_NORTH = 2;
-    const GRAVITY_NORTHEAST = 3;
-    const GRAVITY_WEST = 4;
-    const GRAVITY_EAST = 5;
-    const GRAVITY_SOUTHWEST = 6;
-    const GRAVITY_SOUTH = 7;
-    const GRAVITY_SOUTHEAST = 8;
+    const GRAVITY_CENTER = 'center';
+    const GRAVITY_NORTHWEST = 'northwest';
+    const GRAVITY_NORTH = 'north';
+    const GRAVITY_NORTHEAST = 'northeast';
+    const GRAVITY_WEST = 'west';
+    const GRAVITY_EAST = 'east';
+    const GRAVITY_SOUTHWEST = 'southwest';
+    const GRAVITY_SOUTH = 'south';
+    const GRAVITY_SOUTHEAST = 'southeast';
 
     private Imagick $image;
 
