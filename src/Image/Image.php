@@ -49,7 +49,7 @@ class Image
     /**
      * @param int $width
      * @param int $height
-     * @param int $gravity
+     * @param string $gravity
      * @return Image
      *
      * @throws \Throwable
