@@ -54,7 +54,7 @@ class Image
      *
      * @throws \Throwable
      */
-    public function crop(int $width, int $height, int $gravity = Image::GRAVITY_CENTER)
+    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER)
     {
         $originalAspect = $this->width / $this->height;
 
