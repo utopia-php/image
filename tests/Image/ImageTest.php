@@ -42,7 +42,7 @@ class ImageTest extends TestCase
         $target = __DIR__.'/NW.jpg';
         $original = __DIR__.'/../resources/resize/NW.jpg';
 
-        $image->crop(50, 200, Image::GRAVITY_NORTHWEST);
+        $image->crop(50, 200, Image::GRAVITY_TOP_LEFT);
 
         $image->save($target, 'jpg', 100);
 
@@ -63,7 +63,7 @@ class ImageTest extends TestCase
         $target = __DIR__.'/N.gif';
         $original = __DIR__.'/../resources/resize/N.gif';
 
-        $image->crop(100, 50, Image::GRAVITY_NORTH);
+        $image->crop(100, 50, Image::GRAVITY_TOP);
 
         $image->save($target, 'gif', 100);
 
@@ -84,7 +84,7 @@ class ImageTest extends TestCase
         $target = __DIR__.'/NE.jpg';
         $original = __DIR__.'/../resources/resize/NE.jpg';
 
-        $image->crop(50, 200, Image::GRAVITY_NORTHEAST);
+        $image->crop(50, 200, Image::GRAVITY_TOP_RIGHT);
 
         $image->save($target, 'jpg', 100);
 
@@ -105,7 +105,7 @@ class ImageTest extends TestCase
         $target = __DIR__.'/SW.jpg';
         $original = __DIR__.'/../resources/resize/SW.jpg';
 
-        $image->crop(50, 200, Image::GRAVITY_SOUTHWEST);
+        $image->crop(50, 200, Image::GRAVITY_BOTTOM_LEFT);
 
         $image->save($target, 'jpg', 100);
 
@@ -126,7 +126,7 @@ class ImageTest extends TestCase
         $target = __DIR__.'/S.gif';
         $original = __DIR__.'/../resources/resize/S.gif';
 
-        $image->crop(100, 50, Image::GRAVITY_SOUTH);
+        $image->crop(100, 50, Image::GRAVITY_BOTTOM);
 
         $image->save($target, 'gif', 100);
 
@@ -147,7 +147,7 @@ class ImageTest extends TestCase
         $target = __DIR__.'/SE.jpg';
         $original = __DIR__.'/../resources/resize/SE.jpg';
 
-        $image->crop(50, 200, Image::GRAVITY_SOUTHEAST);
+        $image->crop(50, 200, Image::GRAVITY_BOTTOM_RIGHT);
 
         $image->save($target, 'jpg', 100);
 
@@ -189,7 +189,7 @@ class ImageTest extends TestCase
         $target = __DIR__.'/W.gif';
         $original = __DIR__.'/../resources/resize/W.gif';
 
-        $image->crop(50, 100, Image::GRAVITY_WEST);
+        $image->crop(50, 100, Image::GRAVITY_LEFT);
 
         $image->save($target, 'gif', 100);
 
@@ -210,7 +210,7 @@ class ImageTest extends TestCase
         $target = __DIR__.'/E.jpg';
         $original = __DIR__.'/../resources/resize/E.jpg';
 
-        $image->crop(50, 200, Image::GRAVITY_EAST);
+        $image->crop(50, 200, Image::GRAVITY_RIGHT);
 
         $image->save($target, 'jpg', 100);
 

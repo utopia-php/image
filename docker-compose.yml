@@ -5,9 +5,13 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile-php7
+    volumes:
+      - ./tests:/code/tests
 
   php8:
     build:
       context: .
       dockerfile: ./Dockerfile-php8
+    volumes:
+      - ./tests:/code/tests
   
