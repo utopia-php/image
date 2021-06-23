@@ -10,14 +10,14 @@ use ImagickPixel;
 class Image
 {
     const GRAVITY_CENTER = 'center';
-    const GRAVITY_NORTHWEST = 'northwest';
-    const GRAVITY_NORTH = 'north';
-    const GRAVITY_NORTHEAST = 'northeast';
-    const GRAVITY_WEST = 'west';
-    const GRAVITY_EAST = 'east';
-    const GRAVITY_SOUTHWEST = 'southwest';
-    const GRAVITY_SOUTH = 'south';
-    const GRAVITY_SOUTHEAST = 'southeast';
+    const GRAVITY_TOP_LEFT = 'top-left';
+    const GRAVITY_TOP = 'top';
+    const GRAVITY_TOP_RIGHT = 'top-right';
+    const GRAVITY_LEFT = 'left';
+    const GRAVITY_RIGHT = 'right';
+    const GRAVITY_BOTTOM_LEFT = 'bottom-left';
+    const GRAVITY_BOTTOM = 'bottom';
+    const GRAVITY_BOTTOM_RIGHT = 'bottom-right';
 
     private Imagick $image;
 
@@ -85,31 +85,31 @@ class Image
 
         $x = $y = 0;
         switch ($gravity) {
-            case self::GRAVITY_NORTHWEST:
+            case self::GRAVITY_TOP_LEFT:
                 $x = 0;
                 $y = 0;
-            case self::GRAVITY_NORTH:
+            case self::GRAVITY_TOP:
                 $x = ($resizeWidth / 2) - ($width / 2);
                 break;
-            case self::GRAVITY_NORTHEAST:
+            case self::GRAVITY_TOP_RIGHT:
                 $x = $resizeWidth - $width;
                 break;
-            case self::GRAVITY_WEST:
+            case self::GRAVITY_LEFT:
                 $y = ($resizeHeight / 2) - ($height / 2);
                 break;
-            case self::GRAVITY_EAST:
+            case self::GRAVITY_RIGHT:
                 $x = $resizeWidth - $width;
                 $y = ($resizeHeight / 2) - ($height / 2);
                 break;
-            case self::GRAVITY_SOUTHWEST:
+            case self::GRAVITY_BOTTOM_LEFT:
                 $x = 0;
                 $y = $resizeHeight - $height;
                 break;
-            case self::GRAVITY_SOUTH:
+            case self::GRAVITY_BOTTOM:
                 $x = ($resizeWidth / 2) - ($width / 2);
                 $y = $resizeHeight - $height;
                 break;
-            case self::GRAVITY_SOUTHEAST:
+            case self::GRAVITY_BOTTOM_RIGHT:
                 $x = $resizeWidth - $width;
                 $y = $resizeHeight - $height;
                 break;
