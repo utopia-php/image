@@ -47,6 +47,24 @@ class Image
     }
 
     /**
+     * @return array
+     */
+    public static function getGravityTypes(): array
+    {
+        return [
+            Image::GRAVITY_CENTER,
+            Image::GRAVITY_TOP_LEFT,
+            Image::GRAVITY_TOP,
+            Image::GRAVITY_TOP_RIGHT,
+            Image::GRAVITY_LEFT,
+            Image::GRAVITY_RIGHT,
+            Image::GRAVITY_BOTTOM_LEFT,
+            Image::GRAVITY_BOTTOM,
+            Image::GRAVITY_BOTTOM_RIGHT,
+        ];
+    }
+
+    /**
      * @param int $width
      * @param int $height
      * @param string $gravity
