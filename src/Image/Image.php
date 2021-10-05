@@ -63,15 +63,6 @@ class Image
             Image::GRAVITY_BOTTOM_RIGHT,
         ];
     }
-
-    /**
-     * @param int $width
-     * @param int $height
-     * @param string $gravity
-     * @return Image
-     *
-     * @throws \Throwable
-     */
     public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER)
     {
         $originalAspect = $this->width / $this->height;
@@ -169,14 +160,6 @@ class Image
         return $this;
     }
 
-    /**
-     * @param integer $borderWidth The size of the border in pixels
-     * @param string $borderColor The color of the border in hex format
-     * 
-     * @return Image
-     *
-     * @throws \ImagickException
-     */
     public function setBorder(int $borderWidth, string $borderColor): self
     {
         $this->borderWidth = $borderWidth;
@@ -187,15 +170,6 @@ class Image
 
         return $this;
     }
-
-    /**
-      * Applies rounded corners, background to an image
-      * @param integer $cornerRadius: The radius for the corners
-      * @param string $background: A valid HEX string representing the background color
-      * @return Image $image: The processed image
-      *
-      * @throws \ImagickException
-      */
       public function setBorderRadius(int $cornerRadius): self
       {
         $mask = new Imagick();
@@ -249,13 +223,6 @@ class Image
         return $this;
     }
 
-    /**
-     * Rotates an image to $degree degree
-     * @param integer $degree: The amount to rotate in degrees
-     * @return Image $image: The rotated image
-     *
-     * @throws \ImagickException
-     */
     public function setRotation(int $degree): self
     {
         if (empty($degree) || $degree == 0) {
