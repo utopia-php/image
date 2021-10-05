@@ -44,7 +44,7 @@ $image->save($target, 'png', 100);
 ## System Requirements
 
 Utopia Image requires PHP 7.4 or later. We recommend using the latest PHP version whenever possible.
-
+and follow the guidlines instructerd in readme.
 ## Authors
 
 **Damodar Lohani**
