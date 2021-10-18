@@ -106,6 +106,7 @@ class Image
             case self::GRAVITY_TOP_LEFT:
                 $x = 0;
                 $y = 0;
+                break;
             case self::GRAVITY_TOP:
                 $x = ($resizeWidth / 2) - ($width / 2);
                 break;
