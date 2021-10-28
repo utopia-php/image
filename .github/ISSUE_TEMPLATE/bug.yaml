@@ -35,7 +35,7 @@ body:
     id: appwrite-version
     attributes:
       label: "🎲 Utopia Image version"
-      description: "What version of Appwrite are you running?"
+      description: "What version of Utopia Image are you running?"
       options:
         - Version 0.18.x
         - Version 0.17.x
