@@ -49,6 +49,9 @@ class Image
 
         // Use metadata to fetch rotation. Will be perform right before exporting
         $orientationType = $this->image->getImageProperties()['exif:Orientation'];
+
+        // Reference: https://docs.imgix.com/apis/rendering/rotation/orient
+        // Mirror rotations are ignored, because we don't support mirroring
         if(!empty($orientationType)) {
             switch ($orientationType) {
                 case "3":
