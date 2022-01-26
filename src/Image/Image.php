@@ -31,7 +31,7 @@ class Image
 
     private String $borderColor = '';
 
-    private int $metadataRotation = 0;
+    private int $rotation = 0;
 
     /**
      * @param string $data
@@ -52,15 +52,15 @@ class Image
         if(!empty($orientationType)) {
             switch ($orientationType) {
                 case "3":
-                    $this->metadataRotation = 180;
+                    $this->rotation = 180;
                     break;
 
                 case "6":
-                    $this->metadataRotation = 90;
+                    $this->rotation = 90;
                     break;
 
                 case "8":
-                    $this->metadataRotation = -90;
+                    $this->rotation = -90;
                     break;
             }
         }
@@ -340,8 +340,8 @@ class Image
         }
 
         // Apply original metadata rotation
-        if($this->metadataRotation != 0) {
-            $this->image->rotateImage('transparent', $this->metadataRotation);
+        if($this->rotation != 0) {
+            $this->image->rotateImage('transparent', $this->rotation);
         }
 
         switch ($type) {
