@@ -31,6 +31,8 @@ class Image
 
     private String $borderColor = '';
 
+    private int $metadataRotation = 0;
+
     /**
      * @param string $data
      *
@@ -44,6 +46,24 @@ class Image
 
         $this->width = $this->image->getImageWidth();
         $this->height = $this->image->getImageHeight();
+
+        // Use metadata to fetch rotation. Will be perform right before exporting
+        $orientationType = $this->image->getImageProperties()['exif:Orientation'];
+        if(!empty($orientationType)) {
+            switch ($orientationType) {
+                case "3":
+                    $this->metadataRotation = 180;
+                    break;
+
+                case "6":
+                    $this->metadataRotation = 90;
+                    break;
+
+                case "8":
+                    $this->metadataRotation = -90;
+                    break;
+            }
+        }
     }
 
     /**
@@ -173,7 +193,7 @@ class Image
     /**
      * @param integer $borderWidth The size of the border in pixels
      * @param string $borderColor The color of the border in hex format
-     * 
+     *
      * @return Image
      *
      * @throws \ImagickException
@@ -182,7 +202,7 @@ class Image
     {
         $this->borderWidth = $borderWidth;
         $this->borderColor = $borderColor;
-        
+
         if(!empty($this->cornerRadius)) return $this;
         $this->image->borderImage($borderColor, $borderWidth, $borderWidth);
 
@@ -190,26 +210,26 @@ class Image
     }
 
     /**
-      * Applies rounded corners, background to an image
-      * @param integer $cornerRadius: The radius for the corners
-      * @param string $background: A valid HEX string representing the background color
-      * @return Image $image: The processed image
-      *
-      * @throws \ImagickException
-      */
-      public function setBorderRadius(int $cornerRadius): self
-      {
+     * Applies rounded corners, background to an image
+     * @param integer $cornerRadius: The radius for the corners
+     * @param string $background: A valid HEX string representing the background color
+     * @return Image $image: The processed image
+     *
+     * @throws \ImagickException
+     */
+    public function setBorderRadius(int $cornerRadius): self
+    {
         $mask = new Imagick();
         $mask->newImage($this->width, $this->height, new ImagickPixel('transparent'), 'png');
 
         $rectwidth = ($this->borderWidth>0?($this->width-($this->borderWidth+1)):$this->width-1);
-		$rectheight = ($this->borderWidth>0?($this->height-($this->borderWidth+1)):$this->height-1);
- 
+        $rectheight = ($this->borderWidth>0?($this->height-($this->borderWidth+1)):$this->height-1);
+
 
         $shape = new ImagickDraw();
         $shape->setFillColor(new ImagickPixel('black'));
         $shape->roundRectangle($this->borderWidth, $this->borderWidth, $rectwidth, $rectheight, $cornerRadius, $cornerRadius);
-        
+
         $mask->drawImage($shape);
         $this->image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
 
@@ -225,18 +245,18 @@ class Image
             $shape2->setStrokeWidth($this->borderWidth);
             $shape2->setStrokeColor($bc);
             $shape2->roundRectangle($this->borderWidth, $this->borderWidth, $rectwidth, $rectheight, $cornerRadius, $cornerRadius);
-            
+
             $strokeCanvas->drawImage($shape2);
             $strokeCanvas->compositeImage($this->image, Imagick::COMPOSITE_DEFAULT, 0,0);
-            
+
             $this->image = $strokeCanvas;
         }
         return $this;
-      }
- 
-      /**
+    }
+
+    /**
      * @param float opacity The opacity of the image
-     * 
+     *
      * @return Image
      *
      * @throws \ImagickException
@@ -262,9 +282,9 @@ class Image
         if (empty($degree) || $degree == 0) {
             return $this;
         }
-        
+
         $this->image->rotateImage('transparent', $degree);
-        
+
         return $this;
     }
 
@@ -317,6 +337,11 @@ class Image
             if (!@\mkdir(\dirname($path), 0755, true)) {
                 throw new Exception('Can\'t create directory ' . \dirname($path));
             }
+        }
+
+        // Apply original metadata rotation
+        if($this->metadataRotation != 0) {
+            $this->image->rotateImage('transparent', $this->metadataRotation);
         }
 
         switch ($type) {
