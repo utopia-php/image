@@ -478,5 +478,23 @@ class ImageTest extends TestCase
         \unlink($target);
     }
 
-    
+    public function testGifSmallLastFrame()
+    {
+        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/last-frame-1px.gif'));
+        $target = __DIR__.'/last-frame-1px-output.gif';
+
+        $image->crop(0, 0);
+
+        $image->save($target, 'gif', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(329, $image->getImageWidth());
+        $this->assertEquals(274, $image->getImageHeight());
+        $this->assertEquals('GIF', $image->getImageFormat());
+
+        \unlink($target);
+    }
 }
