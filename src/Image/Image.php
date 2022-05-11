@@ -47,6 +47,9 @@ class Image
         $this->width = $this->image->getImageWidth();
         $this->height = $this->image->getImageHeight();
 
+        // Solve formats such as GIF. Otherwise width&height would be from last frame (wrong)
+        $this->image->setFirstIterator();
+
         // Use metadata to fetch rotation. Will be perform right before exporting
         $orientationType = $this->image->getImageProperties()['exif:Orientation'];
 
