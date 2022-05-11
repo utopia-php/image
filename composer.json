@@ -14,12 +14,12 @@
         "psr-4": {"Utopia\\Image\\":"src/Image"}
     },
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
         "ext-imagick": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3",
-        "vimeo/psalm": "4.0.1"
+        "vimeo/psalm": "4.13.1"
     },
     "minimum-stability": "dev"
 }

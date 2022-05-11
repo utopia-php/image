@@ -44,11 +44,14 @@ class Image
 
         $this->image->readImageBlob($data);
 
+        // Solve formats such as GIF. Otherwise width&height would be from last frame (wrong)
+        $this->image->setFirstIterator();
+
         $this->width = $this->image->getImageWidth();
         $this->height = $this->image->getImageHeight();
 
         // Use metadata to fetch rotation. Will be perform right before exporting
-        $orientationType = $this->image->getImageProperties()['exif:Orientation'];
+        $orientationType = $this->image->getImageProperties()['exif:Orientation'] ?? null;
 
         // Reference: https://docs.imgix.com/apis/rendering/rotation/orient
         // Mirror rotations are ignored, because we don't support mirroring
