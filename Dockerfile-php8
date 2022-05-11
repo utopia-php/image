@@ -11,7 +11,7 @@ RUN composer update --ignore-platform-reqs --optimize-autoloader \
 FROM php:8.0-cli-alpine as step1
 
 ## Last working commit https://github.com/Imagick/imagick/commit/35741750aa1cda2b7ac354bfa6128fa037e9cf32
-ENV PHP_IMAGICK_VERSION=35741750aa1cda2b7ac354bfa6128fa037e9cf32
+ENV PHP_IMAGICK_VERSION=3.7.0
     
 RUN \
   apk add --no-cache --virtual .deps \
@@ -24,12 +24,10 @@ RUN \
   imagemagick \
   imagemagick-dev
 
-
+## Imagick Extension
 RUN \
-  ## Imagick Extension
-  git clone https://github.com/Imagick/imagick && \
+  git clone --depth 1 --branch $PHP_IMAGICK_VERSION https://github.com/imagick/imagick && \
   cd imagick && \
-  git checkout $PHP_IMAGICK_VERSION && \
   phpize && \
   ./configure && \
   make && make install
@@ -48,6 +46,7 @@ RUN \
   g++ \
   && apk add --no-cache \
   libstdc++ \
+  libgomp \
   imagemagick \
   && apk del .deps \
   && rm -rf /var/cache/apk/*
