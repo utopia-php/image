@@ -2,6 +2,7 @@ version: '3'
 
 services:
   php8:
+    container_name: php8
     build:
       context: .
       dockerfile: ./Dockerfile-php8
