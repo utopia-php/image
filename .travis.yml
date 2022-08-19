@@ -29,5 +29,5 @@ install:
 
 script:
   - docker ps -a
-  - docker-compose exec web vendor/bin/phpunit --configuration phpunit.xml
-  - docker-compose exec web vendor/bin/psalm --show-info=true
+  - docker-compose exec php8 vendor/bin/phpunit --configuration phpunit.xml
+  - docker-compose exec php8 vendor/bin/psalm --show-info=true
