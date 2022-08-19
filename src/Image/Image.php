@@ -362,6 +362,10 @@ class Image
                 $this->image->setImageFormat('gif');
                 break;
 
+            case 'avif':
+                $this->image->setImageFormat('avif');
+                break;
+
             case 'webp':
                 try {
                     $this->image->setImageFormat('webp');
