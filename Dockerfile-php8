@@ -63,5 +63,3 @@ COPY ./phpunit.xml /code/phpunit.xml
 COPY ./psalm.xml /code/psalm.xml
 
 RUN echo extension=imagick.so >> /usr/local/etc/php/conf.d/imagick.ini
-
-CMD [ "sh", "-c", "/code/vendor/bin/phpunit --verbose --configuration /code/phpunit.xml && /code/vendor/bin/psalm --show-info=true" ]

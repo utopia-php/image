@@ -24,7 +24,10 @@ before_install:
 - docker buildx create --use
 
 install:
-- docker-compose build
+  - docker-compose up -d
+  - sleep 10
 
 script:
-- docker-compose up
+  - docker ps -a
+  - docker-compose exec web vendor/bin/phpunit --configuration phpunit.xml
+  - docker-compose exec web vendor/bin/psalm --show-info=true
