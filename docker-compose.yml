@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  php8:
-    container_name: php8
+  tests:
+    container_name: tests
     build:
       context: .
       dockerfile: ./Dockerfile-php8

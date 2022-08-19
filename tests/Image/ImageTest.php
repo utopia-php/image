@@ -39,7 +39,7 @@ class ImageTest extends TestCase
     public function testPNG()
     {
         $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
-        $target = __DIR__.'/100x100.jpg';
+        $target = __DIR__.'/100x100.png';
 
         $image->crop(100, 100);
 
@@ -59,7 +59,7 @@ class ImageTest extends TestCase
     public function testAVIF()
     {
         $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
-        $target = __DIR__.'/100x100.jpg';
+        $target = __DIR__.'/100x100.avif';
 
         $image->crop(100, 100);
 

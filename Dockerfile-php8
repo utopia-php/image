@@ -8,7 +8,7 @@ COPY composer.json /src/
 RUN composer update --ignore-platform-reqs --optimize-autoloader \
     --no-plugins --no-scripts --prefer-dist
 
-FROM php:8.0-cli-alpine as step1
+FROM php:8.1-cli-alpine as step1
 
 ## Last working commit https://github.com/Imagick/imagick/commit/35741750aa1cda2b7ac354bfa6128fa037e9cf32
 ENV PHP_IMAGICK_VERSION=3.7.0
@@ -47,6 +47,7 @@ RUN \
   && apk add --no-cache \
   libstdc++ \
   libgomp \
+  libavif \
   imagemagick \
   && apk del .deps \
   && rm -rf /var/cache/apk/*
@@ -54,7 +55,7 @@ RUN \
 WORKDIR /code
 
 COPY --from=step0 /src/vendor /code/vendor
-COPY --from=step1 /usr/local/lib/php/extensions/no-debug-non-zts-20200930/imagick.so /usr/local/lib/php/extensions/no-debug-non-zts-20200930/
+COPY --from=step1 /usr/local/lib/php/extensions/no-debug-non-zts-20210902/imagick.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/
 
 # Add Source Code
 COPY ./tests /code/tests
@@ -63,3 +64,5 @@ COPY ./phpunit.xml /code/phpunit.xml
 COPY ./psalm.xml /code/psalm.xml
 
 RUN echo extension=imagick.so >> /usr/local/etc/php/conf.d/imagick.ini
+
+CMD [ "tail", "-f", "/dev/null" ]
