@@ -14,7 +14,7 @@
         "psr-4": {"Utopia\\Image\\":"src/Image"}
     },
     "require": {
-        "php": ">=8.0",
+        "php": ">=8.1",
         "ext-imagick": "*"
     },
     "require-dev": {
