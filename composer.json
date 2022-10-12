@@ -13,7 +13,6 @@
     "scripts": {
         "check": "./vendor/bin/phpstan analyse --level max src tests"
     },
-    },
     "autoload": {
         "psr-4": {"Utopia\\Image\\":"src/Image"}
     },
