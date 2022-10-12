@@ -10,7 +10,9 @@
             "email": "eldad@appwrite.io"
         }
     ],
-
+    "scripts": {
+        "check": "./vendor/bin/phpstan analyse --level max src tests"
+    },
     },
     "autoload": {
         "psr-4": {"Utopia\\Image\\":"src/Image"}
@@ -21,7 +23,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3",
-        "vimeo/psalm": "4.13.1"
+        "vimeo/psalm": "4.13.1",
+        "phpstan/phpstan": "1.9.x-dev"
     
     },
     "minimum-stability": "dev"
