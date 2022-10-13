@@ -45,13 +45,6 @@ $image->save($target, 'png', 100);
 
 Utopia Image requires PHP 8.0 or later. We recommend using the latest PHP version whenever possible.
 
-## Authors
-
-**Damodar Lohani**
-
-+ [https://twitter.com/lohanidamodar](https://twitter.com/lohanidamodar)
-+ [https://github.com/lohanidamodar](https://github.com/lohanidamodar)
-
 ## Copyright and license
 
 The MIT License (MIT) [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
