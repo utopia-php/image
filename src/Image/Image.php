@@ -10,13 +10,21 @@ use ImagickPixel;
 class Image
 {
     const GRAVITY_CENTER = 'center';
+
     const GRAVITY_TOP_LEFT = 'top-left';
+
     const GRAVITY_TOP = 'top';
+
     const GRAVITY_TOP_RIGHT = 'top-right';
+
     const GRAVITY_LEFT = 'left';
+
     const GRAVITY_RIGHT = 'right';
+
     const GRAVITY_BOTTOM_LEFT = 'bottom-left';
+
     const GRAVITY_BOTTOM = 'bottom';
+
     const GRAVITY_BOTTOM_RIGHT = 'bottom-right';
 
     private Imagick $image;
@@ -34,7 +42,7 @@ class Image
     private int $rotation = 0;
 
     /**
-     * @param string $data
+     * @param  string  $data
      *
      * @throws Exception
      */
@@ -55,17 +63,17 @@ class Image
 
         // Reference: https://docs.imgix.com/apis/rendering/rotation/orient
         // Mirror rotations are ignored, because we don't support mirroring
-        if(!empty($orientationType)) {
+        if (! empty($orientationType)) {
             switch ($orientationType) {
-                case "3":
+                case '3':
                     $this->rotation = 180;
                     break;
 
-                case "6":
+                case '6':
                     $this->rotation = 90;
                     break;
 
-                case "8":
+                case '8':
                     $this->rotation = -90;
                     break;
             }
@@ -91,9 +99,9 @@ class Image
     }
 
     /**
-     * @param int $width
-     * @param int $height
-     * @param string $gravity
+     * @param  int  $width
+     * @param  int  $height
+     * @param  string  $gravity
      * @return Image
      *
      * @throws \Throwable
@@ -197,9 +205,8 @@ class Image
     }
 
     /**
-     * @param integer $borderWidth The size of the border in pixels
-     * @param string $borderColor The color of the border in hex format
-     *
+     * @param  int  $borderWidth The size of the border in pixels
+     * @param  string  $borderColor The color of the border in hex format
      * @return Image
      *
      * @throws \ImagickException
@@ -209,7 +216,9 @@ class Image
         $this->borderWidth = $borderWidth;
         $this->borderColor = $borderColor;
 
-        if(!empty($this->cornerRadius)) return $this;
+        if (! empty($this->cornerRadius)) {
+            return $this;
+        }
         $this->image->borderImage($borderColor, $borderWidth, $borderWidth);
 
         return $this;
@@ -217,8 +226,9 @@ class Image
 
     /**
      * Applies rounded corners, background to an image
-     * @param integer $cornerRadius: The radius for the corners
-     * @param string $background: A valid HEX string representing the background color
+     *
+     * @param  int  $cornerRadius: The radius for the corners
+     * @param  string  $background: A valid HEX string representing the background color
      * @return Image $image: The processed image
      *
      * @throws \ImagickException
@@ -228,9 +238,8 @@ class Image
         $mask = new Imagick();
         $mask->newImage($this->width, $this->height, new ImagickPixel('transparent'), 'png');
 
-        $rectwidth = ($this->borderWidth>0?($this->width-($this->borderWidth+1)):$this->width-1);
-        $rectheight = ($this->borderWidth>0?($this->height-($this->borderWidth+1)):$this->height-1);
-
+        $rectwidth = ($this->borderWidth > 0 ? ($this->width - ($this->borderWidth + 1)) : $this->width - 1);
+        $rectheight = ($this->borderWidth > 0 ? ($this->height - ($this->borderWidth + 1)) : $this->height - 1);
 
         $shape = new ImagickDraw();
         $shape->setFillColor(new ImagickPixel('black'));
@@ -239,12 +248,12 @@ class Image
         $mask->drawImage($shape);
         $this->image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
 
-        if($this->borderWidth > 0) {
+        if ($this->borderWidth > 0) {
             $bc = new ImagickPixel();
             $bc->setColor($this->borderColor);
 
             $strokeCanvas = new Imagick();
-            $strokeCanvas->newImage($this->width, $this->height, new ImagickPixel('transparent'),'png');
+            $strokeCanvas->newImage($this->width, $this->height, new ImagickPixel('transparent'), 'png');
 
             $shape2 = new ImagickDraw();
             $shape2->setFillColor(new ImagickPixel('transparent'));
@@ -253,32 +262,34 @@ class Image
             $shape2->roundRectangle($this->borderWidth, $this->borderWidth, $rectwidth, $rectheight, $cornerRadius, $cornerRadius);
 
             $strokeCanvas->drawImage($shape2);
-            $strokeCanvas->compositeImage($this->image, Imagick::COMPOSITE_DEFAULT, 0,0);
+            $strokeCanvas->compositeImage($this->image, Imagick::COMPOSITE_DEFAULT, 0, 0);
 
             $this->image = $strokeCanvas;
         }
+
         return $this;
     }
 
     /**
      * @param float opacity The opacity of the image
-     *
      * @return Image
      *
      * @throws \ImagickException
      */
     public function setOpacity(float $opacity): self
     {
-        if((empty($opacity) && $opacity != 0) || $opacity == 1) {
+        if ((empty($opacity) && $opacity != 0) || $opacity == 1) {
             return $this;
         }
         $this->image->setImageAlpha($opacity);
+
         return $this;
     }
 
     /**
      * Rotates an image to $degree degree
-     * @param integer $degree: The amount to rotate in degrees
+     *
+     * @param  int  $degree: The amount to rotate in degrees
      * @return Image $image: The rotated image
      *
      * @throws \ImagickException
@@ -294,10 +305,8 @@ class Image
         return $this;
     }
 
-
     /**
-     * @param mixed $color
-     *
+     * @param  mixed  $color
      * @return Image
      *
      * @throws \Throwable
@@ -315,9 +324,8 @@ class Image
      *
      * Prints manipulated image.
      *
-     * @param string $type
-     * @param int    $quality
-     *
+     * @param  string  $type
+     * @param  int  $quality
      * @return false|null|string
      *
      * @throws Exception
@@ -328,10 +336,9 @@ class Image
     }
 
     /**
-     * @param string $path
+     * @param  string  $path
      * @param $type
-     * @param int $quality
-     *
+     * @param  int  $quality
      * @return false|null|string
      *
      * @throws Exception
@@ -339,14 +346,14 @@ class Image
     public function save(string $path = null, string $type = '', int $quality = 75)
     {
         // Create directory with write permissions
-        if (null !== $path && !\file_exists(\dirname($path))) {
-            if (!@\mkdir(\dirname($path), 0755, true)) {
-                throw new Exception('Can\'t create directory ' . \dirname($path));
+        if (null !== $path && ! \file_exists(\dirname($path))) {
+            if (! @\mkdir(\dirname($path), 0755, true)) {
+                throw new Exception('Can\'t create directory '.\dirname($path));
             }
         }
 
         // Apply original metadata rotation
-        if($this->rotation != 0) {
+        if ($this->rotation != 0) {
             $this->image->rotateImage('transparent', $this->rotation);
         }
 
@@ -367,8 +374,8 @@ class Image
                     $this->image->setImageFormat('webp');
                 } catch (\Throwable$th) {
                     $signature = $this->image->getImageSignature();
-                    $temp = '/tmp/temp-' . $signature . '.' . \strtolower($this->image->getImageFormat());
-                    $output = '/tmp/output-' . $signature . '.webp';
+                    $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
+                    $output = '/tmp/output-'.$signature.'.webp';
 
                     // save temp
                     $this->image->writeImages($temp, true);
@@ -425,8 +432,7 @@ class Image
     }
 
     /**
-     * @param int $newHeight
-     *
+     * @param  int  $newHeight
      * @return int
      */
     protected function getSizeByFixedHeight(int $newHeight): int
@@ -438,8 +444,7 @@ class Image
     }
 
     /**
-     * @param int $newWidth
-     *
+     * @param  int  $newWidth
      * @return int
      */
     protected function getSizeByFixedWidth(int $newWidth): int
