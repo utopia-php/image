@@ -38,7 +38,7 @@ class Image
      *
      * @throws Exception
      */
-    public function __construct($data)
+    public function __construct(string $data)
     {
         $this->image = new Imagick();
 
@@ -218,7 +218,6 @@ class Image
     /**
      * Applies rounded corners, background to an image
      * @param integer $cornerRadius: The radius for the corners
-     * @param string $background: A valid HEX string representing the background color
      * @return Image $image: The processed image
      *
      * @throws \ImagickException
@@ -261,7 +260,7 @@ class Image
     }
 
     /**
-     * @param float opacity The opacity of the image
+     * @param float $opacity The opacity of the image
      *
      * @return Image
      *
