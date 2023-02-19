@@ -17,7 +17,7 @@ class ImageTest extends TestCase
 
     public function testCrop100x100(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/100x100.jpg';
 
         $image->crop(100, 100);
@@ -25,7 +25,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -37,7 +37,7 @@ class ImageTest extends TestCase
 
     public function testCropGravityNW(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/NW.jpg';
         $original = __DIR__.'/../resources/resize/NW.jpg';
 
@@ -46,7 +46,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+        $this->assertEquals(\md5(\file_get_contents($target)?: ''), \md5(\file_get_contents($original)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(50, $image->getImageWidth());
@@ -58,7 +58,7 @@ class ImageTest extends TestCase
 
     public function testCropGravityN(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif')?: '');
         $target = __DIR__.'/N.gif';
         $original = __DIR__.'/../resources/resize/N.gif';
 
@@ -67,7 +67,7 @@ class ImageTest extends TestCase
         $image->save($target, 'gif', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+        $this->assertEquals(\md5(\file_get_contents($target)?: ''), \md5(\file_get_contents($original)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -79,7 +79,7 @@ class ImageTest extends TestCase
 
     public function testCropGravityNE(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/NE.jpg';
         $original = __DIR__.'/../resources/resize/NE.jpg';
 
@@ -88,7 +88,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+        $this->assertEquals(\md5(\file_get_contents($target)?: ''), \md5(\file_get_contents($original)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(50, $image->getImageWidth());
@@ -100,7 +100,7 @@ class ImageTest extends TestCase
 
     public function testCropGravitySW(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/SW.jpg';
         $original = __DIR__.'/../resources/resize/SW.jpg';
 
@@ -109,7 +109,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+        $this->assertEquals(\md5(\file_get_contents($target)?: ''), \md5(\file_get_contents($original)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(50, $image->getImageWidth());
@@ -121,7 +121,7 @@ class ImageTest extends TestCase
 
     public function testCropGravityS(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif')?: '');
         $target = __DIR__.'/S.gif';
         $original = __DIR__.'/../resources/resize/S.gif';
 
@@ -130,7 +130,7 @@ class ImageTest extends TestCase
         $image->save($target, 'gif', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+        $this->assertEquals(\md5(\file_get_contents($target)?: ''), \md5(\file_get_contents($original)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -142,7 +142,7 @@ class ImageTest extends TestCase
 
     public function testCropGravitySE(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/SE.jpg';
         $original = __DIR__.'/../resources/resize/SE.jpg';
 
@@ -151,7 +151,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+        $this->assertEquals(\md5(\file_get_contents($target)?: ''), \md5(\file_get_contents($original)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(50, $image->getImageWidth());
@@ -163,7 +163,7 @@ class ImageTest extends TestCase
 
     public function testCropGravityC(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/C.jpg';
         $original = __DIR__.'/../resources/resize/C.jpg';
 
@@ -172,7 +172,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+        $this->assertEquals(\md5(\file_get_contents($target)?: ''), \md5(\file_get_contents($original)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(150, $image->getImageWidth());
@@ -184,7 +184,7 @@ class ImageTest extends TestCase
 
     public function testCropGravityW(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif')?: '');
         $target = __DIR__.'/W.gif';
         $original = __DIR__.'/../resources/resize/W.gif';
 
@@ -193,7 +193,7 @@ class ImageTest extends TestCase
         $image->save($target, 'gif', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+        $this->assertEquals(\md5(\file_get_contents($target)?: ''), \md5(\file_get_contents($original)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(50, $image->getImageWidth());
@@ -205,7 +205,7 @@ class ImageTest extends TestCase
 
     public function testCropGravityE(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/E.jpg';
         $original = __DIR__.'/../resources/resize/E.jpg';
 
@@ -214,7 +214,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(\md5(\file_get_contents($target)), \md5(\file_get_contents($original)));
+        $this->assertEquals(\md5(\file_get_contents($target)?: ''), \md5(\file_get_contents($original)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(50, $image->getImageWidth());
@@ -226,7 +226,7 @@ class ImageTest extends TestCase
 
     public function testCrop100x400(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/100x400.jpg';
 
         $image->crop(100, 400);
@@ -234,7 +234,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -246,7 +246,7 @@ class ImageTest extends TestCase
 
     public function testCrop400x100(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/400x100.jpg';
 
         $image->crop(400, 100);
@@ -254,7 +254,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(400, $image->getImageWidth());
@@ -266,7 +266,7 @@ class ImageTest extends TestCase
 
     public function testCrop100x100WEBP(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/100x100.webp';
         $original = __DIR__.'/../resources/resize/100x100.webp';
 
@@ -275,7 +275,7 @@ class ImageTest extends TestCase
         $image->save($target, 'webp', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
 
@@ -288,7 +288,7 @@ class ImageTest extends TestCase
 
     public function testCrop100x100PNG(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/100x100.png';
         $original = __DIR__.'/../resources/resize/100x100.png';
 
@@ -300,7 +300,7 @@ class ImageTest extends TestCase
         $this->assertGreaterThan(15000, \filesize($target));
         $this->assertLessThan(30000, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -312,7 +312,7 @@ class ImageTest extends TestCase
 
     public function testCrop100x100PNGQuality30(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/100x100-q30.jpg';
         $original = __DIR__.'/../resources/resize/100x100-q30.jpg';
 
@@ -324,7 +324,7 @@ class ImageTest extends TestCase
         $this->assertGreaterThan(500, \filesize($target));
         $this->assertLessThan(2000, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -336,7 +336,7 @@ class ImageTest extends TestCase
 
     public function testCrop100x100GIF(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif')?: '');
         $target = __DIR__.'/100x100.gif';
         $original = __DIR__.'/../resources/resize/100x100.gif';
 
@@ -348,7 +348,7 @@ class ImageTest extends TestCase
         $this->assertGreaterThan(400000, \filesize($target));
         $this->assertLessThan(800000, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -359,7 +359,7 @@ class ImageTest extends TestCase
 
     public function testBorder5Red(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/border_5_red.jpg';
         $original = __DIR__.'/../resources/resize/border_5_red.jpg';
 
@@ -369,7 +369,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('JPEG', $image->getImageFormat());
@@ -378,7 +378,7 @@ class ImageTest extends TestCase
 
     public function testRotate45(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/rotate_45.jpg';
         $original = __DIR__.'/../resources/resize/rotate_45.jpg';
 
@@ -388,7 +388,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('JPEG', $image->getImageFormat());
@@ -399,7 +399,7 @@ class ImageTest extends TestCase
 
     public function testOpacity02(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/opacity_0.2.png';
         $original = __DIR__.'/../resources/resize/opacity_0.2.png';
 
@@ -409,7 +409,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('PNG', $image->getImageFormat());
@@ -418,7 +418,7 @@ class ImageTest extends TestCase
 
     public function testBorderRadius500(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/border_radius_500.png';
         $original = __DIR__.'/../resources/resize/border_radius_500.png';
 
@@ -428,7 +428,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('PNG', $image->getImageFormat());
@@ -437,7 +437,7 @@ class ImageTest extends TestCase
 
     public function testCrop100Op05(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/100x100_OP_0.5.png';
         $original = __DIR__.'/../resources/resize/100x100_OP_0.5.png';
 
@@ -448,7 +448,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals($image->getImageWidth(), 100);
@@ -459,7 +459,7 @@ class ImageTest extends TestCase
 
     public function testCrop100BR50(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg')?: '');
         $target = __DIR__.'/100x100_BR_50.png';
         $original = __DIR__.'/../resources/resize/100x100_BR_50.png';
 
@@ -470,7 +470,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('PNG', $image->getImageFormat());
@@ -479,7 +479,7 @@ class ImageTest extends TestCase
 
     public function testGifSmallLastFrame(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/last-frame-1px.gif'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/last-frame-1px.gif')?: '');
         $target = __DIR__.'/last-frame-1px-output.gif';
 
         $image->crop(0, 0);
@@ -487,7 +487,7 @@ class ImageTest extends TestCase
         $image->save($target, 'gif', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target)?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(329, $image->getImageWidth());
