@@ -42,7 +42,7 @@ class Image
     private int $rotation = 0;
 
     /**
-     * @param string $data
+     * @param  string  $data
      *
      * @throws Exception
      */
@@ -270,8 +270,7 @@ class Image
     }
 
     /**
-     * @param ?float $opacity The opacity of the image
-     *
+     * @param  ?float  $opacity The opacity of the image
      * @return Image
      *
      * @throws \ImagickException
@@ -336,9 +335,9 @@ class Image
     }
 
     /**
-     * @param string  $path
-     * @param string $type
-     * @param int  $quality
+     * @param  string  $path
+     * @param  string  $type
+     * @param  int  $quality
      * @return ($path is null ? string|false : void)
      *
      * @throws Exception
