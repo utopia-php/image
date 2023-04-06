@@ -270,14 +270,14 @@ class Image
     }
 
     /**
-     * @param  ?float  $opacity The opacity of the image
+     * @param  float  $opacity The opacity of the image
      * @return Image
      *
      * @throws \ImagickException
      */
-    public function setOpacity(?float $opacity = null): self
+    public function setOpacity(float $opacity): self
     {
-        if (is_null($opacity) || $opacity == 1) {
+        if ($opacity == 1) {
             return $this;
         }
         $this->image->setImageAlpha($opacity);
@@ -288,14 +288,14 @@ class Image
     /**
      * Rotates an image to $degree degree
      *
-     * @param  ?int  $degree: The amount to rotate in degrees
+     * @param  int  $degree: The amount to rotate in degrees
      * @return Image $image: The rotated image
      *
      * @throws \ImagickException
      */
-    public function setRotation(?int $degree = null): self
+    public function setRotation(int $degree): self
     {
-        if (is_null($degree) || $degree == 0) {
+        if ($degree == 0) {
             return $this;
         }
 
