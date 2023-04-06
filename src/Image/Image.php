@@ -46,7 +46,7 @@ class Image
      *
      * @throws Exception
      */
-    public function __construct($data)
+    public function __construct(string $data)
     {
         $this->image = new Imagick();
 
@@ -81,7 +81,7 @@ class Image
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     public static function getGravityTypes(): array
     {
@@ -228,7 +228,6 @@ class Image
      * Applies rounded corners, background to an image
      *
      * @param  int  $cornerRadius: The radius for the corners
-     * @param  string  $background: A valid HEX string representing the background color
      * @return Image $image: The processed image
      *
      * @throws \ImagickException
@@ -271,14 +270,14 @@ class Image
     }
 
     /**
-     * @param float opacity The opacity of the image
+     * @param  float  $opacity The opacity of the image
      * @return Image
      *
      * @throws \ImagickException
      */
     public function setOpacity(float $opacity): self
     {
-        if ((empty($opacity) && $opacity != 0) || $opacity == 1) {
+        if ($opacity == 1) {
             return $this;
         }
         $this->image->setImageAlpha($opacity);
@@ -296,7 +295,7 @@ class Image
      */
     public function setRotation(int $degree): self
     {
-        if (empty($degree) || $degree == 0) {
+        if ($degree == 0) {
             return $this;
         }
 
@@ -337,9 +336,9 @@ class Image
 
     /**
      * @param  string  $path
-     * @param $type
+     * @param  string  $type
      * @param  int  $quality
-     * @return false|null|string
+     * @return ($path is null ? string|false : void)
      *
      * @throws Exception
      */
@@ -418,7 +417,6 @@ class Image
 
             default:
                 throw new Exception('Invalid output type given');
-                break;
         }
 
         if (empty($path)) {
