@@ -204,6 +204,18 @@ class Image
         return $this;
     }
 
+    public function setAnnotation(string $text, string $font, int $fontSize, string $fillColor, string $gravity = Image::GRAVITY_BOTTOM)
+    {
+        $draw = new ImagickDraw();
+
+        $draw->setFont($font);
+        $draw->setFontSize($fontSize);
+        $draw->setFillColor($fillColor);
+
+        $draw->setGravity($this->toImagickGravity($gravity));
+        $this->image->annotateImage($draw, 10, 10, 0, $text);
+    }
+
     /**
      * @param  int  $borderWidth The size of the border in pixels
      * @param  string  $borderColor The color of the border in hex format
@@ -451,5 +463,29 @@ class Image
         $newHeight = $newWidth * $ratio;
 
         return intval($newHeight);
+    }
+
+    protected function toImagickGravity(string $gravity): int
+    {
+        switch($gravity) {
+            case self::GRAVITY_BOTTOM:
+                return Imagick::GRAVITY_SOUTH;
+            case self::GRAVITY_BOTTOM_LEFT:
+                return Imagick::GRAVITY_SOUTHWEST;
+            case self::GRAVITY_BOTTOM_RIGHT:
+                return Imagick::GRAVITY_SOUTHEAST;
+            case self::GRAVITY_TOP:
+                return Imagick::GRAVITY_NORTH;
+            case self::GRAVITY_TOP_LEFT:
+                return Imagick::GRAVITY_NORTHWEST;
+            case self::GRAVITY_TOP_RIGHT:
+                return Imagick::GRAVITY_NORTHEAST;
+            case self::GRAVITY_CENTER:
+                return Imagick::GRAVITY_CENTER;
+            case self::GRAVITY_LEFT:
+                return Imagick::GRAVITY_WEST;
+            case self::GRAVITY_RIGHT:
+                return Imagick::GRAVITY_EAST;
+        }
     }
 }
