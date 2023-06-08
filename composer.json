@@ -8,7 +8,8 @@
         "psr-4": {"Utopia\\Image\\":"src/Image"}
     },
     "scripts": {
-        "lint": "./vendor/bin/pint --test",
+        "test": "./vendor/bin/phpunit --verbose --configuration ./phpunit.xml",
+        "lint": "./vendor/bin/pint --test -v",
         "format": "./vendor/bin/pint",
         "check": "./vendor/bin/phpstan analyse --level max src tests"
     },
@@ -19,7 +20,7 @@
     "require-dev": {
         "phpunit/phpunit": "^9.3",
         "phpstan/phpstan": "1.9.x-dev",
-        "laravel/pint": "1.10.*"
+        "laravel/pint": "1.2.*"
     },
     "minimum-stability": "dev"
 }
