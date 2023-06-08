@@ -497,12 +497,13 @@ class ImageTest extends TestCase
     //     \unlink($target);
     // }
 
-    public function testAnnotate(): void {
+    public function testAnnotate(): void
+    {
         $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
         $target = __DIR__.'/annotated.jpg';
 
-        $font = __DIR__ . '/../resources/fonts/FiraCode.ttf';
-        $image->annotate(['Appwrite', 'Awesome developer tool', 'BaaS'], $font, 60, "#ffffff", Image::GRAVITY_BOTTOM);
+        $font = __DIR__.'/../resources/fonts/FiraCode.ttf';
+        $image->annotate(['Appwrite', 'Awesome developer tool', 'BaaS'], $font, 60, '#ffffff', Image::GRAVITY_BOTTOM);
 
         $image->save($target, 'jpg', 100);
 

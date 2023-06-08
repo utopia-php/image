@@ -207,11 +207,11 @@ class Image
     /**
      * Annotate Image with text
      *
-     * @param array $lines
-     * @param string $font
-     * @param integer $fontSize
-     * @param string $fillColor
-     * @param string $gravity
+     * @param  array  $lines
+     * @param  string  $font
+     * @param  int  $fontSize
+     * @param  string  $fillColor
+     * @param  string  $gravity
      * @return self
      */
     public function annotate(array $lines, string $font, int $fontSize, string $fillColor, string $gravity = Image::GRAVITY_BOTTOM): self
@@ -225,12 +225,13 @@ class Image
         $draw->setGravity($this->toImagickGravity($gravity));
 
         // need to reverse when gravity is one of the bottom ones
-        if(strpos($gravity, 'bottom') != -1) {
+        if (strpos($gravity, 'bottom') != -1) {
             $lines = array_reverse($lines);
-        } 
+        }
         foreach ($lines as $index => $line) {
             $this->image->annotateImage($draw, 10, 10 + (int) $index * ($fontSize + 5), 0, $line);
         }
+
         return $this;
     }
 
