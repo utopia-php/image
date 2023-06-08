@@ -204,7 +204,17 @@ class Image
         return $this;
     }
 
-    public function setAnnotation(array $lines, string $font, int $fontSize, string $fillColor, string $gravity = Image::GRAVITY_BOTTOM)
+    /**
+     * Annotate Image with text
+     *
+     * @param array $lines
+     * @param string $font
+     * @param integer $fontSize
+     * @param string $fillColor
+     * @param string $gravity
+     * @return self
+     */
+    public function annotate(array $lines, string $font, int $fontSize, string $fillColor, string $gravity = Image::GRAVITY_BOTTOM): self
     {
         $draw = new ImagickDraw();
 
@@ -213,14 +223,15 @@ class Image
         $draw->setFillColor($fillColor);
 
         $draw->setGravity($this->toImagickGravity($gravity));
-        
+
         // need to reverse when gravity is one of the bottom ones
         if(strpos($gravity, 'bottom') != -1) {
             $lines = array_reverse($lines);
         } 
         foreach ($lines as $index => $line) {
-            $this->image->annotateImage($draw, 10, 10 + $index * ($fontSize + 5), 0, $line);
+            $this->image->annotateImage($draw, 10, 10 + (int) $index * ($fontSize + 5), 0, $line);
         }
+        return $this;
     }
 
     /**
@@ -493,6 +504,8 @@ class Image
                 return Imagick::GRAVITY_WEST;
             case self::GRAVITY_RIGHT:
                 return Imagick::GRAVITY_EAST;
+            default:
+                return Imagick::GRAVITY_CENTER;
         }
     }
 }
