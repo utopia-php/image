@@ -9,23 +9,23 @@ use ImagickPixel;
 
 class Image
 {
-    const GRAVITY_CENTER = 'center';
+    public const GRAVITY_CENTER = 'center';
 
-    const GRAVITY_TOP_LEFT = 'top-left';
+    public const GRAVITY_TOP_LEFT = 'top-left';
 
-    const GRAVITY_TOP = 'top';
+    public const GRAVITY_TOP = 'top';
 
-    const GRAVITY_TOP_RIGHT = 'top-right';
+    public const GRAVITY_TOP_RIGHT = 'top-right';
 
-    const GRAVITY_LEFT = 'left';
+    public const GRAVITY_LEFT = 'left';
 
-    const GRAVITY_RIGHT = 'right';
+    public const GRAVITY_RIGHT = 'right';
 
-    const GRAVITY_BOTTOM_LEFT = 'bottom-left';
+    public const GRAVITY_BOTTOM_LEFT = 'bottom-left';
 
-    const GRAVITY_BOTTOM = 'bottom';
+    public const GRAVITY_BOTTOM = 'bottom';
 
-    const GRAVITY_BOTTOM_RIGHT = 'bottom-right';
+    public const GRAVITY_BOTTOM_RIGHT = 'bottom-right';
 
     private Imagick $image;
 
@@ -200,6 +200,37 @@ class Image
         }
         $this->height = $height;
         $this->width = $width;
+
+        return $this;
+    }
+
+    /**
+     * Annotate Image with text
+     *
+     * @param  array<int, string>  $lines
+     * @param  string  $font
+     * @param  int  $fontSize
+     * @param  string  $fillColor
+     * @param  string  $gravity
+     * @return self
+     */
+    public function annotate(array $lines, string $font, int $fontSize, string $fillColor, string $gravity = Image::GRAVITY_BOTTOM): self
+    {
+        $draw = new ImagickDraw();
+
+        $draw->setFont($font);
+        $draw->setFontSize($fontSize);
+        $draw->setFillColor($fillColor);
+
+        $draw->setGravity($this->toImagickGravity($gravity));
+
+        // need to reverse when gravity is one of the bottom ones
+        if (strpos($gravity, 'bottom') != -1) {
+            $lines = array_reverse($lines);
+        }
+        foreach ($lines as $index => $line) {
+            $this->image->annotateImage($draw, 10, 10 + (int) $index * ($fontSize + 5), 0, $line);
+        }
 
         return $this;
     }
@@ -451,5 +482,31 @@ class Image
         $newHeight = $newWidth * $ratio;
 
         return intval($newHeight);
+    }
+
+    protected function toImagickGravity(string $gravity): int
+    {
+        switch($gravity) {
+            case self::GRAVITY_BOTTOM:
+                return Imagick::GRAVITY_SOUTH;
+            case self::GRAVITY_BOTTOM_LEFT:
+                return Imagick::GRAVITY_SOUTHWEST;
+            case self::GRAVITY_BOTTOM_RIGHT:
+                return Imagick::GRAVITY_SOUTHEAST;
+            case self::GRAVITY_TOP:
+                return Imagick::GRAVITY_NORTH;
+            case self::GRAVITY_TOP_LEFT:
+                return Imagick::GRAVITY_NORTHWEST;
+            case self::GRAVITY_TOP_RIGHT:
+                return Imagick::GRAVITY_NORTHEAST;
+            case self::GRAVITY_CENTER:
+                return Imagick::GRAVITY_CENTER;
+            case self::GRAVITY_LEFT:
+                return Imagick::GRAVITY_WEST;
+            case self::GRAVITY_RIGHT:
+                return Imagick::GRAVITY_EAST;
+            default:
+                return Imagick::GRAVITY_CENTER;
+        }
     }
 }

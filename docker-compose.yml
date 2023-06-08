@@ -4,7 +4,6 @@ services:
   php8:
     build:
       context: .
-      dockerfile: ./Dockerfile-php8
     volumes:
       - ./tests:/code/tests
   

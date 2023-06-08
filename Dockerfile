@@ -60,8 +60,8 @@ COPY --from=step1 /usr/local/lib/php/extensions/no-debug-non-zts-20200930/imagic
 COPY ./tests /code/tests
 COPY ./src /code/src
 COPY ./phpunit.xml /code/phpunit.xml
-COPY ./psalm.xml /code/psalm.xml
+COPY ./pint.json /code/pint.json
 
 RUN echo extension=imagick.so >> /usr/local/etc/php/conf.d/imagick.ini
 
-CMD [ "sh", "-c", "/code/vendor/bin/phpunit --verbose --configuration /code/phpunit.xml && /code/vendor/bin/psalm --show-info=true" ]
+CMD [ "sh", "-c", "/code/vendor/bin/phpunit --verbose --configuration /code/phpunit.xml && /code/vendor/bin/pint -v --test" ]

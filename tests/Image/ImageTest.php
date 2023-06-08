@@ -496,4 +496,23 @@ class ImageTest extends TestCase
 
         \unlink($target);
     }
+
+    public function testAnnotate(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/annotated.jpg';
+
+        $font = __DIR__ . '/../resources/fonts/FiraCode.ttf';
+        $image->annotate(['Appwrite', 'Awesome developer tool', 'BaaS'], $font, 60, "#ffffff", Image::GRAVITY_BOTTOM);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $original = __DIR__.'/../resources/annotated/annotated.jpg';
+        $this->assertEquals(\md5(\file_get_contents($target) ?: ''), \md5(\file_get_contents($original) ?: ''));
+
+        \unlink($target);
+    }
 }
