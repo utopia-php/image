@@ -9,23 +9,23 @@ use ImagickPixel;
 
 class Image
 {
-    const GRAVITY_CENTER = 'center';
+    public const GRAVITY_CENTER = 'center';
 
-    const GRAVITY_TOP_LEFT = 'top-left';
+    public const GRAVITY_TOP_LEFT = 'top-left';
 
-    const GRAVITY_TOP = 'top';
+    public const GRAVITY_TOP = 'top';
 
-    const GRAVITY_TOP_RIGHT = 'top-right';
+    public const GRAVITY_TOP_RIGHT = 'top-right';
 
-    const GRAVITY_LEFT = 'left';
+    public const GRAVITY_LEFT = 'left';
 
-    const GRAVITY_RIGHT = 'right';
+    public const GRAVITY_RIGHT = 'right';
 
-    const GRAVITY_BOTTOM_LEFT = 'bottom-left';
+    public const GRAVITY_BOTTOM_LEFT = 'bottom-left';
 
-    const GRAVITY_BOTTOM = 'bottom';
+    public const GRAVITY_BOTTOM = 'bottom';
 
-    const GRAVITY_BOTTOM_RIGHT = 'bottom-right';
+    public const GRAVITY_BOTTOM_RIGHT = 'bottom-right';
 
     private Imagick $image;
 
@@ -207,7 +207,7 @@ class Image
     /**
      * Annotate Image with text
      *
-     * @param  array  $lines
+     * @param  array<int, string>  $lines
      * @param  string  $font
      * @param  int  $fontSize
      * @param  string  $fillColor
