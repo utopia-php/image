@@ -42,7 +42,7 @@ class Image
     private int $rotation = 0;
 
     /**
-     * @param string $data
+     * @param  string  $data
      *
      * @throws \ImagickException
      */
