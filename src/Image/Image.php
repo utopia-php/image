@@ -44,7 +44,7 @@ class Image
     /**
      * @param  string  $data
      *
-     * @throws Exception
+     * @throws \ImagickException
      */
     public function __construct(string $data)
     {
