@@ -360,7 +360,6 @@ class Image
             case 'jpg':
             case 'jpeg':
                 $this->image->setImageCompressionQuality($quality);
-
                 $this->image->setImageFormat('jpg');
                 break;
 
@@ -370,6 +369,7 @@ class Image
 
             case 'webp':
                 try {
+                    $this->image->setImageCompressionQuality($quality);
                     $this->image->setImageFormat('webp');
                 } catch (\Throwable$th) {
                     $signature = $this->image->getImageSignature();
@@ -406,12 +406,10 @@ class Image
             case 'png':
                 /* Scale quality from 0-100 to 0-9 */
                 $scaleQuality = \round(($quality / 100) * 9);
-
                 /* Invert quality setting as 0 is best, not 9 */
                 $invertScaleQuality = intval(9 - $scaleQuality);
 
                 $this->image->setImageCompressionQuality($invertScaleQuality);
-
                 $this->image->setImageFormat('png');
                 break;
 
