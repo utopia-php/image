@@ -17,7 +17,7 @@ class ImageTest extends TestCase
 
     public function testJPEG(): void
     {
-        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
         $target = __DIR__.'/100x100.jpg';
 
         $image->crop(100, 100);
@@ -25,7 +25,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -37,7 +37,7 @@ class ImageTest extends TestCase
 
     public function testPNG(): void
     {
-        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
         $target = __DIR__.'/100x100.png';
 
         $image->crop(100, 100);
@@ -45,7 +45,7 @@ class ImageTest extends TestCase
         $image->save($target, 'png', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -57,7 +57,7 @@ class ImageTest extends TestCase
 
     public function testAVIF(): void
     {
-        $image = new Image(\file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg'));
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
         $target = __DIR__.'/100x100.avif';
 
         $image->crop(100, 100);
@@ -65,7 +65,7 @@ class ImageTest extends TestCase
         $image->save($target, 'avif', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target)));
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
