@@ -371,6 +371,10 @@ class Image
                 $this->image->setImageFormat('avif');
                 break;
 
+            case 'heic':
+                $this->image->setImageFormat('heic');
+                break;
+
             case 'webp':
                 try {
                     $this->image->setImageCompressionQuality($quality);
