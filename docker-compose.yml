@@ -5,7 +5,7 @@ services:
     container_name: tests
     build:
       context: .
-      dockerfile: ./Dockerfile-php8
+      dockerfile: ./Dockerfile
     volumes:
       - ./tests:/code/tests
       

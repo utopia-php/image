@@ -49,6 +49,10 @@ RUN \
   libgomp \
   libavif \
   imagemagick \
+  imagemagick-dev \
+  libjpeg-turbo-dev \
+  jpeg-dev \
+  libjxl-dev \
   && apk del .deps \
   && rm -rf /var/cache/apk/*
 
