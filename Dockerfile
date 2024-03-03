@@ -47,10 +47,11 @@ RUN \
   && apk add --no-cache \
   libstdc++ \
   libgomp \
-  libavif \
   imagemagick \
   imagemagick-dev \
   libjpeg-turbo-dev \
+  libavif \
+  libheif \
   jpeg-dev \
   libjxl-dev \
   && apk del .deps \
