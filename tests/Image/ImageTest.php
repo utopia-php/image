@@ -374,6 +374,34 @@ class ImageTest extends TestCase
         //\unlink($target);
     }
 
+    public function testCrop100x100HEIC(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.heic';
+        $original = __DIR__.'/../resources/resize/100x100.heic';
+
+        $image->crop(100, 100);
+
+        $image->save($target, 'heic', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertGreaterThan(500, \filesize($target));
+        $this->assertEquals(2081, \filesize($target));
+        $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $image = new \Imagick($target);
+
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('HEIC', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
     public function testCrop100x100PNG(): void
     {
         $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');

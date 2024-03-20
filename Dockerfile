@@ -54,6 +54,7 @@ RUN \
   libheif \
   jpeg-dev \
   libjxl-dev \
+  imagemagick-heic \
   && apk del .deps \
   && rm -rf /var/cache/apk/*
 
