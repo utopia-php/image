@@ -22,7 +22,12 @@ before_install:
 - sudo service docker start
 - docker --version
 - docker buildx create --use
-- docker-compose up -d
+
+install:
+  - docker-compose up -d
+  - sleep 10
 
 script:
-- docker compose exec php8 /code/vendor/bin/phpunit --configuration /code/phpunit.xml $@
+  - docker ps -a
+  - docker-compose exec tests vendor/bin/phpunit --configuration phpunit.xml
+  - docker-compose exec tests vendor/bin/psalm --show-info=true

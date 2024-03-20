@@ -15,6 +15,66 @@ class ImageTest extends TestCase
     {
     }
 
+    public function testJPEG(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.jpg';
+
+        $image->crop(100, 100);
+
+        $image->save($target, 'jpg', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('JPEG', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testPNG(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.png';
+
+        $image->crop(100, 100);
+
+        $image->save($target, 'png', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('PNG', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testAVIF(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.avif';
+
+        $image->crop(100, 100);
+
+        $image->save($target, 'avif', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('AVIF', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
     public function testCrop100x100(): void
     {
         $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
@@ -312,6 +372,34 @@ class ImageTest extends TestCase
         $this->assertTrue(in_array($image->getImageFormat(), ['PAM', 'WEBP']));
 
         //\unlink($target);
+    }
+
+    public function testCrop100x100HEIC(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.heic';
+        $original = __DIR__.'/../resources/resize/100x100.heic';
+
+        $image->crop(100, 100);
+
+        $image->save($target, 'heic', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertGreaterThan(500, \filesize($target));
+        $this->assertEquals(2081, \filesize($target));
+        $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $image = new \Imagick($target);
+
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('HEIC', $image->getImageFormat());
+
+        \unlink($target);
     }
 
     public function testCrop100x100PNG(): void
