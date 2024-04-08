@@ -8,7 +8,7 @@ COPY composer.json /src/
 RUN composer update --ignore-platform-reqs --optimize-autoloader \
     --no-plugins --no-scripts --prefer-dist
 
-FROM php:8.0-cli-alpine as step1
+FROM php:8.2-cli-alpine as step1
 
 ## Last working commit https://github.com/Imagick/imagick/commit/35741750aa1cda2b7ac354bfa6128fa037e9cf32
 ENV PHP_IMAGICK_VERSION=3.7.0
@@ -32,7 +32,7 @@ RUN \
   ./configure && \
   make && make install
 
-FROM php:8.0-cli-alpine as final
+FROM php:8.2-cli-alpine as final
 
 LABEL maintainer="team@appwrite.io"
 
@@ -48,13 +48,21 @@ RUN \
   libstdc++ \
   libgomp \
   imagemagick \
+  imagemagick-dev \
+  libjpeg-turbo-dev \
+  libavif \
+  libheif \
+  jpeg-dev \
+  libjxl-dev \
+  imagemagick-heic \
+  libwebp \
   && apk del .deps \
   && rm -rf /var/cache/apk/*
 
 WORKDIR /code
 
 COPY --from=step0 /src/vendor /code/vendor
-COPY --from=step1 /usr/local/lib/php/extensions/no-debug-non-zts-20200930/imagick.so /usr/local/lib/php/extensions/no-debug-non-zts-20200930/
+COPY --from=step1 /usr/local/lib/php/extensions/no-debug-non-zts-20220829/imagick.so /usr/local/lib/php/extensions/no-debug-non-zts-20220829/
 
 # Add Source Code
 COPY ./tests /code/tests
