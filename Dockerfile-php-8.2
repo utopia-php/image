@@ -15,7 +15,6 @@ LABEL maintainer="team@appwrite.io"
 WORKDIR /code
 
 COPY --from=step0 /src/vendor /code/vendor
-COPY --from=step1 /usr/local/lib/php/extensions/no-debug-non-zts-20220829/imagick.so /usr/local/lib/php/extensions/no-debug-non-zts-20220829/
 
 # Add Source Code
 COPY ./tests /code/tests
