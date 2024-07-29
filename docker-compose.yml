@@ -2,10 +2,8 @@ version: '3'
 
 services:
   tests:
-    container_name: tests
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile-php-${PHP_VERSION:-8.3}
     volumes:
       - ./tests:/code/tests
-      
