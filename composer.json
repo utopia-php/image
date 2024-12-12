@@ -20,7 +20,6 @@
     },
 
     "require-dev": {
-        "swoole/ide-helper": "4.8.5",
         "phpunit/phpunit": "^9.3",
         "vimeo/psalm": "4.13.1",
         "phpstan/phpstan": "1.9.x-dev",
