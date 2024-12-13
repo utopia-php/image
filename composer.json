@@ -2,6 +2,7 @@
     "name": "utopia-php/image",
     "description": "A simple Image manipulation library",
     "type": "library",
+    "version": "2.7.9",
     "keywords": ["php","framework","upf","utopia","image"],
     "license": "MIT",
     "autoload": {
