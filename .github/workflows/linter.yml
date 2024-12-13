@@ -12,6 +12,9 @@ jobs:
       with:
         fetch-depth: 2
 
+    - name: Configure Git Safe Directory
+      run: git config --global --add safe.directory /app
+
     - run: git checkout HEAD^2
 
     - name: Run Linter
