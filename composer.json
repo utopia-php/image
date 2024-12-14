@@ -2,25 +2,30 @@
     "name": "utopia-php/image",
     "description": "A simple Image manipulation library",
     "type": "library",
+    "version": "2.7.9",
     "keywords": ["php","framework","upf","utopia","image"],
     "license": "MIT",
     "autoload": {
         "psr-4": {"Utopia\\Image\\":"src/Image"}
     },
+
     "scripts": {
-        "lint": "./vendor/bin/pint --test",
-        "format": "./vendor/bin/pint",
+        "lint": "./vendor/bin/pint --test --config pint.json",
+        "format": "./vendor/bin/pint --config pint.json",
         "check": "./vendor/bin/phpstan analyse --level max src tests"
     },
+
     "require": {
         "php": ">=8.1",
         "ext-imagick": "*"
     },
+
     "require-dev": {
         "phpunit/phpunit": "^9.3",
         "vimeo/psalm": "4.13.1",
         "phpstan/phpstan": "1.9.x-dev",
         "laravel/pint": "1.2.*"
     },
+
     "minimum-stability": "dev"
 }
