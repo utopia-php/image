@@ -342,7 +342,7 @@ class Image
      *
      * @throws Exception
      */
-    public function save(string $path = null, string $type = '', int $quality = 75)
+    public function save(?string $path = null, string $type = '', int $quality = 75)
     {
         // Create directory with write permissions
         if (null !== $path && ! \file_exists(\dirname($path))) {
