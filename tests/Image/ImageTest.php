@@ -57,20 +57,30 @@ class ImageTest extends TestCase
 
     public function testAVIF(): void
     {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
         $target = __DIR__.'/100x100.avif';
+        $targetCompressed = __DIR__.'/100x100-q30.avif';
 
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
         $image->crop(100, 100);
-
         $image->save($target, 'avif', 100);
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $image->crop(100, 100);
+        $image->save($targetCompressed, 'avif', 30);
+
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
         $this->assertEquals(100, $image->getImageHeight());
         $this->assertEquals('AVIF', $image->getImageFormat());
+        
+        $imageCompressed = new \Imagick($targetCompressed);
+        $this->assertEquals(100, $imageCompressed->getImageWidth());
+        $this->assertEquals(100, $imageCompressed->getImageHeight());
+        $this->assertEquals('AVIF', $imageCompressed->getImageFormat());
+        $this->assertLessThan(\filesize($target), \filesize($targetCompressed));
 
         \unlink($target);
     }
