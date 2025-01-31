@@ -368,20 +368,9 @@ class Image
                 break;
 
             case 'avif':
+                $this->image->setImageCompressionQuality($quality);
                 $this->image->setImageFormat('avif');
-                if (empty($path)) {
-                    return $this->image->getImagesBlob();
-                } else {
-                    $this->image->writeImages($path, true);
-                }
-                $this->image->clear();
-                $this->image->destroy();
-
-                $image = imagecreatefromavif($path);
-                imageavif($image, $path, $quality);
-                imagedestroy($image);
-
-                return;
+                break;
 
             case 'heic':
                 $this->image->setImageFormat('heic');
