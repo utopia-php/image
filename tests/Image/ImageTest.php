@@ -75,7 +75,7 @@ class ImageTest extends TestCase
         $this->assertEquals(100, $image->getImageWidth());
         $this->assertEquals(100, $image->getImageHeight());
         $this->assertEquals('AVIF', $image->getImageFormat());
-        
+
         $imageCompressed = new \Imagick($targetCompressed);
         $this->assertEquals(100, $imageCompressed->getImageWidth());
         $this->assertEquals(100, $imageCompressed->getImageHeight());

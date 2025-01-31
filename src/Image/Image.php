@@ -380,6 +380,7 @@ class Image
                 $image = imagecreatefromavif($path);
                 imageavif($image, $path, $quality);
                 imagedestroy($image);
+
                 return;
 
             case 'heic':
