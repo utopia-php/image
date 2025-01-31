@@ -373,6 +373,7 @@ class Image
                 break;
 
             case 'heic':
+                $this->image->setImageCompressionQuality($quality);
                 $this->image->setImageFormat('heic');
                 break;
 
