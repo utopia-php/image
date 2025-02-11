@@ -364,7 +364,7 @@ class ImageTest extends TestCase
         $image->save($target, 'avif', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertEquals(1419, \filesize($target));
+        $this->assertEquals(7823, \filesize($target));
         $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
@@ -408,7 +408,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertGreaterThan(500, \filesize($target));
-        $this->assertEquals(2081, \filesize($target));
+        $this->assertEquals(8426, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
         $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 

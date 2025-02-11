@@ -368,32 +368,38 @@ class Image
                 break;
 
             case 'avif':
-                $this->image->setImageFormat('avif');
+            case 'heic':
+                $signature = $this->image->getImageSignature();
+                $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
+                $output = '/tmp/output-'.$signature.'.'.$type;
+
+                $this->image->writeImages($temp, true);
+
+                \exec("magick convert $temp -quality $quality $output");
+
+                $data = \file_get_contents($output);
 
                 if (empty($path)) {
-                    return $this->image->getImagesBlob();
+                    // Clean up temp files
+                    \unlink($output);
+                    \unlink($temp);
+
+                    $this->image->clear();
+                    $this->image->destroy();
+
+                    return $data;
                 } else {
-                    $this->image->writeImages($path, true);
-                }
+                    \file_put_contents($path, $data, LOCK_EX);
 
-                $this->image->clear();
-                $this->image->destroy();
+                    // Clean up temp files
+                    \unlink($output);
+                    \unlink($temp);
 
-                $image = \imagecreatefromavif($path);
-                if (! $image) {
+                    $this->image->clear();
+                    $this->image->destroy();
+
                     return;
                 }
-
-                \imageavif($image, $path, $quality);
-                \imagedestroy($image);
-
-                return;
-
-            case 'heic':
-                $this->image->setImageCompressionQuality($quality);
-                $this->image->setImageFormat('heic');
-                break;
-
             case 'webp':
                 try {
                     $this->image->setImageCompressionQuality($quality);
