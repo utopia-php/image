@@ -373,33 +373,29 @@ class Image
                 $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
                 $output = '/tmp/output-'.$signature.'.'.$type;
 
+                // save temp
                 $this->image->writeImages($temp, true);
 
+                // convert temp
                 \exec("magick convert $temp -quality $quality $output");
 
                 $data = \file_get_contents($output);
 
+                // save to path
                 if (empty($path)) {
-                    // Clean up temp files
-                    \unlink($output);
-                    \unlink($temp);
-
-                    $this->image->clear();
-                    $this->image->destroy();
-
                     return $data;
                 } else {
                     \file_put_contents($path, $data, LOCK_EX);
-
-                    // Clean up temp files
-                    \unlink($output);
-                    \unlink($temp);
-
-                    $this->image->clear();
-                    $this->image->destroy();
-
-                    return;
                 }
+
+                // delete temp files
+                \unlink($output);
+                \unlink($temp);
+
+                $this->image->clear();
+                $this->image->destroy();
+
+                return;
             case 'webp':
                 try {
                     $this->image->setImageCompressionQuality($quality);
@@ -417,7 +413,7 @@ class Image
 
                     $data = \file_get_contents($output);
 
-                    //load webp
+                    // save to path
                     if (empty($path)) {
                         return $data;
                     } else {
@@ -427,7 +423,7 @@ class Image
                     $this->image->clear();
                     $this->image->destroy();
 
-                    //delete webp
+                    // delete temp files
                     \unlink($output);
                     \unlink($temp);
 
