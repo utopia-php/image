@@ -377,7 +377,18 @@ class Image
                 $this->image->writeImages($temp, true);
 
                 // convert temp
-                \exec("magick convert $temp -quality $quality $output");
+                $quality = (int) $quality;
+                $command = \sprintf(
+                    'magick convert %s -quality %d %s',
+                    \escapeshellarg($temp),
+                    $quality,
+                    \escapeshellarg($output)
+                );
+                \exec($command, $outputArray, $returnCode);
+
+                if ($returnCode !== 0) {
+                    throw new Exception('Image conversion failed');
+                }
 
                 $data = \file_get_contents($output);
 
@@ -409,7 +420,14 @@ class Image
                     $this->image->writeImages($temp, true);
 
                     // convert temp
-                    \exec("cwebp -quiet -metadata none -q $quality $temp -o $output");
+                    $quality = (int) $quality;
+                    $command = \sprintf(
+                        'cwebp -quiet -metadata none -q %d %s -o %s',
+                        $quality,
+                        \escapeshellarg($temp),
+                        \escapeshellarg($output)
+                    );
+                    \exec($command, $outputArray, $returnCode);
 
                     $data = \file_get_contents($output);
 
