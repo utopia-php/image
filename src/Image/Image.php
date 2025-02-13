@@ -429,6 +429,10 @@ class Image
                     );
                     \exec($command, $outputArray, $returnCode);
 
+                    if ($returnCode !== 0) {
+                        throw new Exception('Image conversion failed');
+                    }
+
                     $data = \file_get_contents($output);
 
                     // save to path
