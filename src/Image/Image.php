@@ -465,10 +465,10 @@ class Image
 
                     return $data;
                 } finally {
-                    if (file_exists($temp)) {
+                    if ($temp !== null && file_exists($temp)) {
                         \unlink($temp);
                     }
-                    if (file_exists($output)) {
+                    if ($output !== null && file_exists($output)) {
                         \unlink($output);
                     }
 
