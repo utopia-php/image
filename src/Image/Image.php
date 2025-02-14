@@ -373,51 +373,63 @@ class Image
                 $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
                 $output = '/tmp/output-'.$signature.'.'.$type;
 
-                // save temp
-                $this->image->writeImages($temp, true);
+                try {
+                    // save temp
+                    $this->image->writeImages($temp, true);
 
-                // convert temp
-                $quality = (int) $quality;
-                $command = \sprintf(
-                    'magick convert %s -quality %d %s',
-                    \escapeshellarg($temp),
-                    $quality,
-                    \escapeshellarg($output)
-                );
-                \exec($command, $outputArray, $returnCode);
+                    // convert temp
+                    $quality = (int) $quality;
+                    $command = \sprintf(
+                        'magick convert %s -quality %d %s',
+                        \escapeshellarg($temp),
+                        $quality,
+                        \escapeshellarg($output)
+                    );
+                    \exec($command, $outputArray, $returnCode);
 
-                if ($returnCode !== 0) {
+                    if ($returnCode !== 0) {
+                        $this->image->clear();
+                        $this->image->destroy();
+
+                        // delete temp files
+                        \unlink($output);
+                        \unlink($temp);
+
+                        throw new Exception('Image conversion failed');
+                    }
+
+                    $data = \file_get_contents($output);
+
+                    // save to path
+                    if (! empty($path)) {
+                        \file_put_contents($path, $data, LOCK_EX);
+
+                        return;
+                    }
+
+                    return $data;
+                } finally {
+                    if (file_exists($temp)) {
+                        \unlink($temp);
+                    }
+                    if (file_exists($output)) {
+                        \unlink($output);
+                    }
+
                     $this->image->clear();
                     $this->image->destroy();
-
-                    // delete temp files
-                    \unlink($output);
-                    \unlink($temp);
-
-                    throw new Exception('Image conversion failed');
                 }
 
-                $data = \file_get_contents($output);
-
-                // save to path
-                if (empty($path)) {
-                    return $data;
-                } else {
-                    \file_put_contents($path, $data, LOCK_EX);
-                }
-
-                // delete temp files
-                \unlink($output);
-                \unlink($temp);
-
-                $this->image->clear();
-                $this->image->destroy();
-
-                return;
             case 'webp':
                 try {
                     $this->image->setImageCompressionQuality($quality);
                     $this->image->setImageFormat('webp');
+
+                    if (empty($path)) {
+                        return $this->image->getImagesBlob();
+                    } else {
+                        $this->image->writeImages($path, true);
+                    }
                 } catch (\Throwable$th) {
                     $signature = $this->image->getImageSignature();
                     $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
@@ -437,35 +449,32 @@ class Image
                     \exec($command, $outputArray, $returnCode);
 
                     if ($returnCode !== 0) {
-                        $this->image->clear();
-                        $this->image->destroy();
-
-                        // delete temp files
-                        \unlink($output);
-                        \unlink($temp);
-
                         throw new Exception('Image conversion failed');
                     }
 
                     $data = \file_get_contents($output);
 
                     // save to path
-                    if (empty($path)) {
-                        return $data;
-                    } else {
+                    if (! empty($path)) {
                         \file_put_contents($path, $data, LOCK_EX);
+
+                        return;
+                    }
+
+                    return $data;
+                } finally {
+                    if (file_exists($temp)) {
+                        \unlink($temp);
+                    }
+                    if (file_exists($output)) {
+                        \unlink($output);
                     }
 
                     $this->image->clear();
                     $this->image->destroy();
-
-                    // delete temp files
-                    \unlink($output);
-                    \unlink($temp);
-
-                    return;
                 }
-                break;
+
+                return;
 
             case 'png':
                 /* Scale quality from 0-100 to 0-9 */
