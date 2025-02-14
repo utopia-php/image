@@ -421,6 +421,8 @@ class Image
                 }
 
             case 'webp':
+                $temp = null;
+                $output = null;
                 try {
                     $this->image->setImageCompressionQuality($quality);
                     $this->image->setImageFormat('webp');
