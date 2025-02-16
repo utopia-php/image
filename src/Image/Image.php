@@ -388,13 +388,6 @@ class Image
                     \exec($command, $outputArray, $returnCode);
 
                     if ($returnCode !== 0) {
-                        $this->image->clear();
-                        $this->image->destroy();
-
-                        // delete temp files
-                        \unlink($output);
-                        \unlink($temp);
-
                         throw new Exception('Image conversion failed');
                     }
 
