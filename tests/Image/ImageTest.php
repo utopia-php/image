@@ -55,26 +55,6 @@ class ImageTest extends TestCase
         \unlink($target);
     }
 
-    public function testAVIF(): void
-    {
-        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__.'/100x100.avif';
-
-        $image->crop(100, 100);
-
-        $image->save($target, 'avif', 100);
-
-        $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
-
-        $image = new \Imagick($target);
-        $this->assertEquals(100, $image->getImageWidth());
-        $this->assertEquals(100, $image->getImageHeight());
-        $this->assertEquals('AVIF', $image->getImageFormat());
-
-        \unlink($target);
-    }
-
     public function testCrop100x100(): void
     {
         $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
@@ -371,7 +351,49 @@ class ImageTest extends TestCase
         $this->assertEquals(100, $image->getImageHeight());
         $this->assertTrue(in_array($image->getImageFormat(), ['PAM', 'WEBP']));
 
-        //\unlink($target);
+        \unlink($target);
+    }
+
+    public function testCrop100x100AVIF(): void
+    {
+        $image = new Image(\file_get_contents(filename: __DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.avif';
+
+        $image->crop(100, 100);
+
+        $image->save($target, 'avif', 100);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertEquals(7823, \filesize($target));
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('AVIF', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCrop100x100AVIFQuality30(): void
+    {
+        $image = new Image(\file_get_contents(filename: __DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100-q30.avif';
+
+        $image->crop(100, 100);
+
+        $image->save($target, 'avif', 30);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertLessThan(1419, \filesize($target));
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $image = new \Imagick($target);
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('AVIF', $image->getImageFormat());
+
+        \unlink($target);
     }
 
     public function testCrop100x100HEIC(): void
@@ -386,7 +408,35 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertGreaterThan(500, \filesize($target));
-        $this->assertEquals(2081, \filesize($target));
+        $this->assertEquals(8426, \filesize($target));
+        $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+
+        $image = new \Imagick($target);
+
+        $this->assertEquals(100, $image->getImageWidth());
+        $this->assertEquals(100, $image->getImageHeight());
+        $this->assertEquals('HEIC', $image->getImageFormat());
+
+        \unlink($target);
+    }
+
+    public function testCrop100x100HEICQuality30(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100-q30.heic';
+        $original = __DIR__.'/../resources/resize/100x100.heic';
+
+        $image->crop(100, 100);
+
+        $image->save($target, 'heic', 30);
+
+        $this->assertEquals(\is_readable($target), true);
+        $this->assertGreaterThan(500, \filesize($target));
+        $this->assertLessThan(2081, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
         $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 

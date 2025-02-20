@@ -342,7 +342,7 @@ class Image
      *
      * @throws Exception
      */
-    public function save(string $path = null, string $type = '', int $quality = 75)
+    public function save(?string $path = null, string $type = '', int $quality = 75)
     {
         // Create directory with write permissions
         if (null !== $path && ! \file_exists(\dirname($path))) {
@@ -368,17 +368,63 @@ class Image
                 break;
 
             case 'avif':
-                $this->image->setImageFormat('avif');
-                break;
-
             case 'heic':
-                $this->image->setImageFormat('heic');
-                break;
+                $signature = $this->image->getImageSignature();
+                $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
+                $output = '/tmp/output-'.$signature.'.'.$type;
+
+                try {
+                    // save temp
+                    $this->image->writeImages($temp, true);
+
+                    // convert temp
+                    $quality = (int) $quality;
+                    $command = \sprintf(
+                        'magick convert %s -quality %d %s',
+                        \escapeshellarg($temp),
+                        $quality,
+                        \escapeshellarg($output)
+                    );
+                    \exec($command, $outputArray, $returnCode);
+
+                    if ($returnCode !== 0) {
+                        throw new Exception('Image conversion failed');
+                    }
+
+                    $data = \file_get_contents($output);
+
+                    // save to path
+                    if (! empty($path)) {
+                        \file_put_contents($path, $data, LOCK_EX);
+
+                        return;
+                    }
+
+                    return $data;
+                } finally {
+                    if (file_exists($temp)) {
+                        \unlink($temp);
+                    }
+                    if (file_exists($output)) {
+                        \unlink($output);
+                    }
+
+                    $this->image->clear();
+                    $this->image->destroy();
+                }
 
             case 'webp':
+                $temp = null;
+                $output = null;
                 try {
                     $this->image->setImageCompressionQuality($quality);
                     $this->image->setImageFormat('webp');
+
+                    if (empty($path)) {
+                        return $this->image->getImagesBlob();
+                    } else {
+                        $this->image->writeImages($path, true);
+                    }
                 } catch (\Throwable$th) {
                     $signature = $this->image->getImageSignature();
                     $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
@@ -388,28 +434,42 @@ class Image
                     $this->image->writeImages($temp, true);
 
                     // convert temp
-                    \exec("cwebp -quiet -metadata none -q $quality $temp -o $output");
+                    $quality = (int) $quality;
+                    $command = \sprintf(
+                        'cwebp -quiet -metadata none -q %d %s -o %s',
+                        $quality,
+                        \escapeshellarg($temp),
+                        \escapeshellarg($output)
+                    );
+                    \exec($command, $outputArray, $returnCode);
+
+                    if ($returnCode !== 0) {
+                        throw new Exception('Image conversion failed');
+                    }
 
                     $data = \file_get_contents($output);
 
-                    //load webp
-                    if (empty($path)) {
-                        return $data;
-                    } else {
+                    // save to path
+                    if (! empty($path)) {
                         \file_put_contents($path, $data, LOCK_EX);
+
+                        return;
+                    }
+
+                    return $data;
+                } finally {
+                    if ($temp !== null && file_exists($temp)) {
+                        \unlink($temp);
+                    }
+                    if ($output !== null && file_exists($output)) {
+                        \unlink($output);
                     }
 
                     $this->image->clear();
                     $this->image->destroy();
-
-                    //delete webp
-                    \unlink($output);
-                    \unlink($temp);
-
-                    return;
                 }
 
-                break;
+                return;
 
             case 'png':
                 /* Scale quality from 0-100 to 0-9 */
