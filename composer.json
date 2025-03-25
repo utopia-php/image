@@ -9,7 +9,7 @@
     },
     "scripts": {
         "lint": "./vendor/bin/pint --test",
-        "check": "./vendor/bin/phpstan analyse --level max src tests --level=8",
+        "check": "./vendor/bin/phpstan analyse --level max src tests",
         "test": "phpunit"
     },
     "require": {
