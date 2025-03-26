@@ -5,5 +5,4 @@ parameters:
         - tests
     excludePaths:
         - tests/resources
-        - tests/Image
         - vendor
