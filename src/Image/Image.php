@@ -380,7 +380,7 @@ class Image
                     // convert temp
                     $quality = (int) $quality;
                     $command = \sprintf(
-                        'magick convert %s -quality %d %s',
+                        'magick convert %s -quality %d %s 2>&1', // 2>&1 redirect stderr to stdout
                         \escapeshellarg($temp),
                         $quality,
                         \escapeshellarg($output)
@@ -388,7 +388,7 @@ class Image
                     \exec($command, $outputArray, $returnCode);
 
                     if ($returnCode !== 0) {
-                        throw new Exception('Image conversion failed');
+                        throw new Exception("Image conversion failed with status {$returnCode}: ".implode("\n", $outputArray));
                     }
 
                     $data = \file_get_contents($output);
