@@ -388,7 +388,7 @@ class Image
                     \exec($command, $outputArray, $returnCode);
 
                     if ($returnCode !== 0) {
-                        throw new Exception('Image conversion failed');
+                        throw new Exception("Image conversion failed with status {$returnCode}: ".implode("\n", $outputArray));
                     }
 
                     $data = \file_get_contents($output);
