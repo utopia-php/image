@@ -380,7 +380,7 @@ class Image
                     // convert temp
                     $quality = (int) $quality;
                     $command = \sprintf(
-                        'magick convert %s -quality %d %s',
+                        'magick convert %s -quality %d %s 2>&1', // 2>&1 redirect stderr to stdout
                         \escapeshellarg($temp),
                         $quality,
                         \escapeshellarg($output)
