@@ -370,8 +370,8 @@ class Image
             case 'avif':
             case 'heic':
                 $signature = $this->image->getImageSignature();
-                $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
-                $output = '/tmp/output-'.$signature.'.'.$type;
+                $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature.'.'.\strtolower($this->image->getImageFormat()));
+                $output = tempnam(sys_get_temp_dir(), 'output-'.$signature.'.'.$type);
 
                 try {
                     // save temp
@@ -427,8 +427,8 @@ class Image
                     }
                 } catch (\Throwable$th) {
                     $signature = $this->image->getImageSignature();
-                    $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
-                    $output = '/tmp/output-'.$signature.'.webp';
+                    $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature.'.'.\strtolower($this->image->getImageFormat()));
+                    $output = tempnam(sys_get_temp_dir(), 'output-'.$signature.'.webp');
 
                     // save temp
                     $this->image->writeImages($temp, true);
