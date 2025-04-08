@@ -370,17 +370,21 @@ class Image
             case 'avif':
             case 'heic':
                 $signature = $this->image->getImageSignature();
-                $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature).'.'.\strtolower($this->image->getImageFormat());
+
+                $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature);
                 if ($temp === false) {
                     throw new Exception('Failed to create temporary file');
                 }
-                $output = tempnam(sys_get_temp_dir(), 'output-'.$signature).'.'.$type;
+                $temp .= '.'.\strtolower($this->image->getImageFormat());
+
+                $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
                 if ($output === false) {
                     if (is_string($temp) && file_exists($temp)) {
                         \unlink($temp);
                     }
                     throw new Exception('Failed to create output file');
                 }
+                $output .= '.'.$type;
 
                 try {
                     // save temp
@@ -436,17 +440,21 @@ class Image
                     }
                 } catch (\Throwable$th) {
                     $signature = $this->image->getImageSignature();
-                    $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature).'.'.\strtolower($this->image->getImageFormat());
+
+                    $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature);
                     if ($temp === false) {
                         throw new Exception('Failed to create temporary file');
                     }
-                    $output = tempnam(sys_get_temp_dir(), 'output-'.$signature).'.'.$type;
+                    $temp .= '.'.\strtolower($this->image->getImageFormat());
+
+                    $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
                     if ($output === false) {
                         if (is_string($temp) && file_exists($temp)) {
                             \unlink($temp);
                         }
                         throw new Exception('Failed to create output file');
                     }
+                    $output .= '.'.$type;
 
                     // save temp
                     $this->image->writeImages($temp, true);
