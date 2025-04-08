@@ -370,8 +370,21 @@ class Image
             case 'avif':
             case 'heic':
                 $signature = $this->image->getImageSignature();
-                $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
-                $output = '/tmp/output-'.$signature.'.'.$type;
+
+                $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature);
+                if ($temp === false) {
+                    throw new Exception('Failed to create temporary file');
+                }
+                $temp .= '.'.\strtolower($this->image->getImageFormat());
+
+                $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
+                if ($output === false) {
+                    if (is_string($temp) && file_exists($temp)) {
+                        \unlink($temp);
+                    }
+                    throw new Exception('Failed to create output file');
+                }
+                $output .= '.'.$type;
 
                 try {
                     // save temp
@@ -402,10 +415,10 @@ class Image
 
                     return $data;
                 } finally {
-                    if (file_exists($temp)) {
+                    if (is_string($temp) && file_exists($temp)) {
                         \unlink($temp);
                     }
-                    if (file_exists($output)) {
+                    if (is_string($output) && file_exists($output)) {
                         \unlink($output);
                     }
 
@@ -427,8 +440,21 @@ class Image
                     }
                 } catch (\Throwable$th) {
                     $signature = $this->image->getImageSignature();
-                    $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
-                    $output = '/tmp/output-'.$signature.'.webp';
+
+                    $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature);
+                    if ($temp === false) {
+                        throw new Exception('Failed to create temporary file');
+                    }
+                    $temp .= '.'.\strtolower($this->image->getImageFormat());
+
+                    $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
+                    if ($output === false) {
+                        if (is_string($temp) && file_exists($temp)) {
+                            \unlink($temp);
+                        }
+                        throw new Exception('Failed to create output file');
+                    }
+                    $output .= '.'.$type;
 
                     // save temp
                     $this->image->writeImages($temp, true);
@@ -458,10 +484,10 @@ class Image
 
                     return $data;
                 } finally {
-                    if ($temp !== null && file_exists($temp)) {
+                    if (is_string($temp) && file_exists($temp)) {
                         \unlink($temp);
                     }
-                    if ($output !== null && file_exists($output)) {
+                    if (is_string($output) && file_exists($output)) {
                         \unlink($output);
                     }
 
