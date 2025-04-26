@@ -16,6 +16,6 @@ jobs:
 
       - name: Run Static Analysis
         run: |
-          docker run --rm -v $PWD:/app composer:2.0 sh -c \
+          docker run --rm -v $PWD:/app composer:2.6 sh -c \
           "composer install --profile --ignore-platform-reqs && composer check && composer lint"
           
