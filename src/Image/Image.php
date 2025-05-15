@@ -359,7 +359,10 @@ class Image
         switch ($type) {
             case 'jpg':
             case 'jpeg':
-                $this->image->setImageCompressionQuality($quality);
+                if ($quality >= 0) {
+                    $this->image->setImageCompressionQuality($quality);
+                }
+
                 $this->image->setImageFormat('jpg');
                 break;
 
@@ -375,15 +378,14 @@ class Image
                 if ($temp === false) {
                     throw new Exception('Failed to create temporary file');
                 }
-                $temp .= '.'.\strtolower($this->image->getImageFormat());
 
                 $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
                 if ($output === false) {
-                    if (is_string($temp) && file_exists($temp)) {
-                        \unlink($temp);
-                    }
+                    \unlink($temp);
                     throw new Exception('Failed to create output file');
                 }
+
+                $temp .= '.'.\strtolower($this->image->getImageFormat());
                 $output .= '.'.$type;
 
                 try {
@@ -391,14 +393,18 @@ class Image
                     $this->image->writeImages($temp, true);
 
                     // convert temp
+                    $command = ['magick convert', \escapeshellarg($temp)];
+
                     $quality = (int) $quality;
-                    $command = \sprintf(
-                        'magick convert %s -quality %d %s 2>&1', // 2>&1 redirect stderr to stdout
-                        \escapeshellarg($temp),
-                        $quality,
-                        \escapeshellarg($output)
-                    );
-                    \exec($command, $outputArray, $returnCode);
+                    if ($quality >= 0) {
+                        $command = [...$command, '-quality', $quality];
+                    }
+
+                    $command = [
+                        ...$command, \escapeshellarg($output), '2>&1', // 2>&1 redirect stderr to stdout
+                    ];
+
+                    \exec(implode(' ', $command), $outputArray, $returnCode);
 
                     if ($returnCode !== 0) {
                         throw new Exception("Image conversion failed with status {$returnCode}: ".implode("\n", $outputArray));
@@ -415,10 +421,10 @@ class Image
 
                     return $data;
                 } finally {
-                    if (is_string($temp) && file_exists($temp)) {
+                    if (file_exists($temp)) {
                         \unlink($temp);
                     }
-                    if (is_string($output) && file_exists($output)) {
+                    if (file_exists($output)) {
                         \unlink($output);
                     }
 
@@ -430,7 +436,9 @@ class Image
                 $temp = null;
                 $output = null;
                 try {
-                    $this->image->setImageCompressionQuality($quality);
+                    if ($quality >= 0) {
+                        $this->image->setImageCompressionQuality($quality);
+                    }
                     $this->image->setImageFormat('webp');
 
                     if (empty($path)) {
@@ -438,22 +446,21 @@ class Image
                     } else {
                         $this->image->writeImages($path, true);
                     }
-                } catch (\Throwable$th) {
+                } catch (\Throwable) {
                     $signature = $this->image->getImageSignature();
 
                     $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature);
                     if ($temp === false) {
                         throw new Exception('Failed to create temporary file');
                     }
-                    $temp .= '.'.\strtolower($this->image->getImageFormat());
 
                     $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
                     if ($output === false) {
-                        if (is_string($temp) && file_exists($temp)) {
-                            \unlink($temp);
-                        }
+                        \unlink($temp);
                         throw new Exception('Failed to create output file');
                     }
+
+                    $temp .= '.'.\strtolower($this->image->getImageFormat());
                     $output .= '.'.$type;
 
                     // save temp
@@ -498,12 +505,13 @@ class Image
                 return;
 
             case 'png':
-                /* Scale quality from 0-100 to 0-9 */
-                $scaleQuality = \round(($quality / 100) * 9);
-                /* Invert quality setting as 0 is best, not 9 */
-                $invertScaleQuality = intval(9 - $scaleQuality);
-
-                $this->image->setImageCompressionQuality($invertScaleQuality);
+                if ($quality >= 0) {
+                    /* Scale quality from 0-100 to 0-9 */
+                    $scaleQuality = \round(($quality / 100) * 9);
+                    /* Invert quality setting as 0 is best, not 9 */
+                    $invertScaleQuality = intval(9 - $scaleQuality);
+                    $this->image->setImageCompressionQuality($invertScaleQuality);
+                }
                 $this->image->setImageFormat('png');
                 break;
 
