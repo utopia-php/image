@@ -25,7 +25,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -45,7 +45,7 @@ class ImageTest extends TestCase
         $image->save($target, 'png', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        //$this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -65,7 +65,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        //$this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -274,7 +274,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        //$this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -294,7 +294,7 @@ class ImageTest extends TestCase
         $image->save($target, 'jpg', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(400, $image->getImageWidth());
@@ -315,7 +315,7 @@ class ImageTest extends TestCase
         $image->save($target, 'webp', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
 
@@ -340,10 +340,10 @@ class ImageTest extends TestCase
         $this->assertGreaterThan(500, \filesize($target));
         $this->assertLessThan(2000, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
 
@@ -365,7 +365,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(7823, \filesize($target));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -386,7 +386,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertLessThan(1419, \filesize($target));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -410,10 +410,10 @@ class ImageTest extends TestCase
         $this->assertGreaterThan(500, \filesize($target));
         $this->assertEquals(8426, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
 
@@ -438,10 +438,10 @@ class ImageTest extends TestCase
         $this->assertGreaterThan(500, \filesize($target));
         $this->assertLessThan(2081, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
 
@@ -466,7 +466,7 @@ class ImageTest extends TestCase
         $this->assertGreaterThan(15000, \filesize($target));
         $this->assertLessThan(30000, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -490,7 +490,7 @@ class ImageTest extends TestCase
         $this->assertGreaterThan(500, \filesize($target));
         $this->assertLessThan(2000, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -514,7 +514,7 @@ class ImageTest extends TestCase
         $this->assertGreaterThan(400000, \filesize($target));
         $this->assertLessThan(800000, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(100, $image->getImageWidth());
@@ -535,7 +535,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('JPEG', $image->getImageFormat());
@@ -554,7 +554,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('JPEG', $image->getImageFormat());
@@ -575,7 +575,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('PNG', $image->getImageFormat());
@@ -594,7 +594,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('PNG', $image->getImageFormat());
@@ -614,7 +614,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals($image->getImageWidth(), 100);
@@ -636,7 +636,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals('PNG', $image->getImageFormat());
@@ -653,7 +653,7 @@ class ImageTest extends TestCase
         $image->save($target, 'gif', 100);
 
         $this->assertEquals(\is_readable($target), true);
-        $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
+        // $this->assertNotEmpty(\md5(\file_get_contents($target) ?: ''));
 
         $image = new \Imagick($target);
         $this->assertEquals(329, $image->getImageWidth());
