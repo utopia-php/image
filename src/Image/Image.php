@@ -106,8 +106,17 @@ class Image
      *
      * @throws \Throwable
      */
-    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER)
+    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
     {
+        // if no changes to Gravity, Width or Height, don't process image
+        if ($gravity === Image::GRAVITY_CENTER &&
+            (
+                (! empty($width) && ! empty($height)) &&
+                ($width == $this->width && $height == $this->height)
+            )) {
+            return $this;
+        }
+
         $originalAspect = $this->width / $this->height;
 
         if (empty($width)) {
@@ -553,15 +562,15 @@ class Image
         return intval($newHeight);
     }
 
-    public static function setResourceLimits(string $type, int $value): void
+    public static function setResourceLimit(string $type, int $value): void
     {
         match ($type) {
-            'area' => Imagick::setResourceLimits(Imagick::RESOURCETYPE_AREA, $value),
-            'disk' => Imagick::setResourceLimits(Imagick::RESOURCETYPE_DISK, $value),
-            'file' => Imagick::setResourceLimits(Imagick::RESOURCETYPE_FILE, $value),
-            'map' => Imagick::setResourceLimits(Imagick::RESOURCETYPE_MAP, $value),
-            'memory' => Imagick::setResourceLimits(Imagick::RESOURCETYPE_MEMORY, $value),
-            'thread' => Imagick::setResourceLimits(Imagick::RESOURCETYPE_THREAD, $value),
+            'area' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_AREA, $value),
+            'disk' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_DISK, $value),
+            'file' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_FILE, $value),
+            'map' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_MAP, $value),
+            'memory' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, $value),
+            'thread' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_THREAD, $value),
             default => null,
         };
     }
