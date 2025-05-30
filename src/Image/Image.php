@@ -106,8 +106,17 @@ class Image
      *
      * @throws \Throwable
      */
-    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER)
+    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
     {
+        // if no changes to Gravity, Width or Height, don't process image
+        if ($gravity === Image::GRAVITY_CENTER &&
+            (
+                (empty($width) && empty($height)) ||
+                ($width == $this->width && $height == $this->height)
+            )) {
+            return $this;
+        }
+
         $originalAspect = $this->width / $this->height;
 
         if (empty($width)) {
