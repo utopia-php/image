@@ -7,10 +7,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Check out the repo
+      uses: actions/checkout@v2
       with:
         fetch-depth: 2
+
+    - name: Configure Git Safe Directory
+      run: git config --global --add safe.directory /app
 
     - run: git checkout HEAD^2
 
