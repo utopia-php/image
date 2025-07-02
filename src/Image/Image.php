@@ -106,8 +106,17 @@ class Image
      *
      * @throws \Throwable
      */
-    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER)
+    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
     {
+        // if no changes to Gravity, Width or Height, don't process image
+        if ($gravity === Image::GRAVITY_CENTER &&
+            (
+                (! empty($width) && ! empty($height)) &&
+                ($width == $this->width && $height == $this->height)
+            )) {
+            return $this;
+        }
+
         $originalAspect = $this->width / $this->height;
 
         if (empty($width)) {
@@ -342,7 +351,7 @@ class Image
      *
      * @throws Exception
      */
-    public function save(string $path = null, string $type = '', int $quality = 75)
+    public function save(?string $path = null, string $type = '', int $quality = 75)
     {
         // Create directory with write permissions
         if (null !== $path && ! \file_exists(\dirname($path))) {
@@ -359,7 +368,10 @@ class Image
         switch ($type) {
             case 'jpg':
             case 'jpeg':
-                $this->image->setImageCompressionQuality($quality);
+                if ($quality >= 0) {
+                    $this->image->setImageCompressionQuality($quality);
+                }
+
                 $this->image->setImageFormat('jpg');
                 break;
 
@@ -368,56 +380,147 @@ class Image
                 break;
 
             case 'avif':
-                $this->image->setImageFormat('avif');
-                break;
-
             case 'heic':
-                $this->image->setImageFormat('heic');
-                break;
+                $signature = $this->image->getImageSignature();
+
+                $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature);
+                if ($temp === false) {
+                    throw new Exception('Failed to create temporary file');
+                }
+
+                $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
+                if ($output === false) {
+                    \unlink($temp);
+                    throw new Exception('Failed to create output file');
+                }
+
+                $temp .= '.'.\strtolower($this->image->getImageFormat());
+                $output .= '.'.$type;
+
+                try {
+                    // save temp
+                    $this->image->writeImages($temp, true);
+
+                    // convert temp
+                    $command = ['magick convert', \escapeshellarg($temp)];
+
+                    $quality = (int) $quality;
+                    if ($quality >= 0) {
+                        $command = [...$command, '-quality', $quality];
+                    }
+
+                    $command = [
+                        ...$command, \escapeshellarg($output), '2>&1', // 2>&1 redirect stderr to stdout
+                    ];
+
+                    \exec(implode(' ', $command), $outputArray, $returnCode);
+
+                    if ($returnCode !== 0) {
+                        throw new Exception("Image conversion failed with status {$returnCode}: ".implode("\n", $outputArray));
+                    }
+
+                    $data = \file_get_contents($output);
+
+                    // save to path
+                    if (! empty($path)) {
+                        \file_put_contents($path, $data, LOCK_EX);
+
+                        return;
+                    }
+
+                    return $data;
+                } finally {
+                    if (file_exists($temp)) {
+                        \unlink($temp);
+                    }
+                    if (file_exists($output)) {
+                        \unlink($output);
+                    }
+
+                    $this->image->clear();
+                    $this->image->destroy();
+                }
 
             case 'webp':
+                $temp = null;
+                $output = null;
                 try {
-                    $this->image->setImageCompressionQuality($quality);
+                    if ($quality >= 0) {
+                        $this->image->setImageCompressionQuality($quality);
+                    }
                     $this->image->setImageFormat('webp');
-                } catch (\Throwable$th) {
+
+                    if (empty($path)) {
+                        return $this->image->getImagesBlob();
+                    } else {
+                        $this->image->writeImages($path, true);
+                    }
+                } catch (\Throwable) {
                     $signature = $this->image->getImageSignature();
-                    $temp = '/tmp/temp-'.$signature.'.'.\strtolower($this->image->getImageFormat());
-                    $output = '/tmp/output-'.$signature.'.webp';
+
+                    $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature);
+                    if ($temp === false) {
+                        throw new Exception('Failed to create temporary file');
+                    }
+
+                    $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
+                    if ($output === false) {
+                        \unlink($temp);
+                        throw new Exception('Failed to create output file');
+                    }
+
+                    $temp .= '.'.\strtolower($this->image->getImageFormat());
+                    $output .= '.'.$type;
 
                     // save temp
                     $this->image->writeImages($temp, true);
 
                     // convert temp
-                    \exec("cwebp -quiet -metadata none -q $quality $temp -o $output");
+                    $quality = (int) $quality;
+                    $command = \sprintf(
+                        'cwebp -quiet -metadata none -q %d %s -o %s',
+                        $quality,
+                        \escapeshellarg($temp),
+                        \escapeshellarg($output)
+                    );
+                    \exec($command, $outputArray, $returnCode);
+
+                    if ($returnCode !== 0) {
+                        throw new Exception('Image conversion failed');
+                    }
 
                     $data = \file_get_contents($output);
 
-                    //load webp
-                    if (empty($path)) {
-                        return $data;
-                    } else {
+                    // save to path
+                    if (! empty($path)) {
                         \file_put_contents($path, $data, LOCK_EX);
+
+                        return;
+                    }
+
+                    return $data;
+                } finally {
+                    if (is_string($temp) && file_exists($temp)) {
+                        \unlink($temp);
+                    }
+                    if (is_string($output) && file_exists($output)) {
+                        \unlink($output);
                     }
 
                     $this->image->clear();
                     $this->image->destroy();
-
-                    //delete webp
-                    \unlink($output);
-                    \unlink($temp);
-
-                    return;
                 }
 
-                break;
+                return;
 
             case 'png':
-                /* Scale quality from 0-100 to 0-9 */
-                $scaleQuality = \round(($quality / 100) * 9);
-                /* Invert quality setting as 0 is best, not 9 */
-                $invertScaleQuality = intval(9 - $scaleQuality);
-
-                $this->image->setImageCompressionQuality($invertScaleQuality);
+                if ($quality >= 0) {
+                    /* Scale quality from 0-100 to 0-9 */
+                    $scaleQuality = \round(($quality / 100) * 9);
+                    /* Invert quality setting as 0 is best, not 9 */
+                    $invertScaleQuality = intval(9 - $scaleQuality);
+                    $this->image->setImageCompressionQuality($invertScaleQuality);
+                }
                 $this->image->setImageFormat('png');
                 break;
 
@@ -457,5 +560,18 @@ class Image
         $newHeight = $newWidth * $ratio;
 
         return intval($newHeight);
+    }
+
+    public static function setResourceLimit(string $type, int $value): void
+    {
+        match ($type) {
+            'area' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_AREA, $value),
+            'disk' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_DISK, $value),
+            'file' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_FILE, $value),
+            'map' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_MAP, $value),
+            'memory' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, $value),
+            'thread' => Imagick::setResourceLimit(Imagick::RESOURCETYPE_THREAD, $value),
+            default => null,
+        };
     }
 }
