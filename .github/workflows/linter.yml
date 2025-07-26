@@ -17,4 +17,4 @@ jobs:
     - name: Run Linter
       run: |
         docker run --rm -v $PWD:/app composer:2.6 sh -c \
-        "composer install --profile --ignore-platform-reqs && composer lint"
+        "composer install --profile --ignore-platform-reqs && composer lint && composer check"
