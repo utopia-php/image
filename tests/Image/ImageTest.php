@@ -471,7 +471,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertGreaterThan(500, \filesize($target));
-        $this->assertEquals(8426, \filesize($target));
+        $this->assertEquals(8490, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
         $this->assertFileExists($target);
         $this->assertNotEmpty(\file_get_contents($target));

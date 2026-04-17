@@ -367,10 +367,14 @@ class Image
 
             case 'avif':
             case 'heic':
-                if ($quality >= 0) {
-                    $this->image->setImageCompressionQuality($quality);
-                }
                 $this->image->setImageFormat($type);
+                if ($quality >= 0) {
+                    // setImageCompressionQuality() is silently ignored by the libheif coder —
+                    // setCompressionQuality() (object-level, not image-level) must be called
+                    // after setImageFormat() for quality to take effect on AVIF/HEIC output.
+                    // See: https://github.com/Imagick/imagick/issues/711
+                    $this->image->setCompressionQuality($quality);
+                }
                 break;
 
             case 'webp':
