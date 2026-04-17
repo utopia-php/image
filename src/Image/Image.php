@@ -97,8 +97,6 @@ class Image
     }
 
     /**
-     * @return Image
-     *
      * @throws \Throwable
      */
     public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
