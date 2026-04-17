@@ -97,8 +97,6 @@ class Image
     }
 
     /**
-     * @return Image
-     *
      * @throws \Throwable
      */
     public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
@@ -369,65 +367,15 @@ class Image
 
             case 'avif':
             case 'heic':
-                $signature = $this->image->getImageSignature();
-
-                $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature);
-                if ($temp === false) {
-                    throw new Exception('Failed to create temporary file');
+                $this->image->setImageFormat($type);
+                if ($quality >= 0) {
+                    // setImageCompressionQuality() is silently ignored by the libheif coder —
+                    // setCompressionQuality() (object-level, not image-level) must be called
+                    // after setImageFormat() for quality to take effect on AVIF/HEIC output.
+                    // See: https://github.com/Imagick/imagick/issues/711
+                    $this->image->setCompressionQuality($quality);
                 }
-
-                $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
-                if ($output === false) {
-                    \unlink($temp);
-                    throw new Exception('Failed to create output file');
-                }
-
-                $temp .= '.'.\strtolower($this->image->getImageFormat());
-                $output .= '.'.$type;
-
-                try {
-                    // save temp
-                    $this->image->writeImages($temp, true);
-
-                    // convert temp
-                    $command = ['magick convert', \escapeshellarg($temp)];
-
-                    $quality = (int) $quality;
-                    if ($quality >= 0) {
-                        $command = [...$command, '-quality', $quality];
-                    }
-
-                    $command = [
-                        ...$command, \escapeshellarg($output), '2>&1', // 2>&1 redirect stderr to stdout
-                    ];
-
-                    \exec(implode(' ', $command), $outputArray, $returnCode);
-
-                    if ($returnCode !== 0) {
-                        throw new Exception("Image conversion failed with status {$returnCode}: ".implode("\n", $outputArray));
-                    }
-
-                    $data = \file_get_contents($output);
-
-                    // save to path
-                    if (! empty($path)) {
-                        \file_put_contents($path, $data, LOCK_EX);
-
-                        return;
-                    }
-
-                    return $data;
-                } finally {
-                    if (file_exists($temp)) {
-                        \unlink($temp);
-                    }
-                    if (file_exists($output)) {
-                        \unlink($output);
-                    }
-
-                    $this->image->clear();
-                    $this->image->destroy();
-                }
+                break;
 
             case 'webp':
                 $temp = null;
