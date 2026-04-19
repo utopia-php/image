@@ -378,76 +378,11 @@ class Image
                 break;
 
             case 'webp':
-                $temp = null;
-                $output = null;
-                try {
-                    if ($quality >= 0) {
-                        $this->image->setImageCompressionQuality($quality);
-                    }
-                    $this->image->setImageFormat('webp');
-
-                    if (empty($path)) {
-                        return $this->image->getImagesBlob();
-                    } else {
-                        $this->image->writeImages($path, true);
-                    }
-                } catch (\Throwable) {
-                    $signature = $this->image->getImageSignature();
-
-                    $temp = tempnam(sys_get_temp_dir(), 'temp-'.$signature);
-                    if ($temp === false) {
-                        throw new Exception('Failed to create temporary file');
-                    }
-
-                    $output = tempnam(sys_get_temp_dir(), 'output-'.$signature);
-                    if ($output === false) {
-                        \unlink($temp);
-                        throw new Exception('Failed to create output file');
-                    }
-
-                    $temp .= '.'.\strtolower($this->image->getImageFormat());
-                    $output .= '.'.$type;
-
-                    // save temp
-                    $this->image->writeImages($temp, true);
-
-                    // convert temp
-                    $quality = (int) $quality;
-                    $command = \sprintf(
-                        'cwebp -quiet -metadata none -q %d %s -o %s',
-                        $quality,
-                        \escapeshellarg($temp),
-                        \escapeshellarg($output)
-                    );
-                    \exec($command, $outputArray, $returnCode);
-
-                    if ($returnCode !== 0) {
-                        throw new Exception('Image conversion failed');
-                    }
-
-                    $data = \file_get_contents($output);
-
-                    // save to path
-                    if (! empty($path)) {
-                        \file_put_contents($path, $data, LOCK_EX);
-
-                        return;
-                    }
-
-                    return $data;
-                } finally {
-                    if (is_string($temp) && file_exists($temp)) {
-                        \unlink($temp);
-                    }
-                    if (is_string($output) && file_exists($output)) {
-                        \unlink($output);
-                    }
-
-                    $this->image->clear();
-                    $this->image->destroy();
+                if ($quality >= 0) {
+                    $this->image->setImageCompressionQuality($quality);
                 }
-
-                return;
+                $this->image->setImageFormat('webp');
+                break;
 
             case 'png':
                 if ($quality >= 0) {

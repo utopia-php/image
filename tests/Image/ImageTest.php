@@ -412,6 +412,46 @@ class ImageTest extends TestCase
         \unlink($target);
     }
 
+    public function test_webp_blob_output(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+
+        $image->crop(100, 100);
+
+        $blob = $image->output('webp', 75);
+
+        $this->assertIsString($blob);
+        $this->assertNotEmpty($blob);
+        $this->assertSame('RIFF', \substr($blob, 0, 4));
+        $this->assertSame('WEBP', \substr($blob, 8, 4));
+
+        $probe = new \Imagick;
+        $probe->readImageBlob($blob);
+        $this->assertEquals(100, $probe->getImageWidth());
+        $this->assertEquals(100, $probe->getImageHeight());
+        $this->assertTrue(in_array($probe->getImageFormat(), ['PAM', 'WEBP']));
+    }
+
+    public function test_webp_from_webp_input(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/resize/100x100.webp') ?: '');
+        $target = __DIR__.'/roundtrip.webp';
+
+        $image->crop(50, 50);
+
+        $image->save($target, 'webp', 75);
+
+        $this->assertFileExists($target);
+        $this->assertNotEmpty(\file_get_contents($target));
+
+        $probe = new \Imagick($target);
+        $this->assertEquals(50, $probe->getImageWidth());
+        $this->assertEquals(50, $probe->getImageHeight());
+        $this->assertTrue(in_array($probe->getImageFormat(), ['PAM', 'WEBP']));
+
+        \unlink($target);
+    }
+
     public function test_crop100x100_avif(): void
     {
         $image = new Image(\file_get_contents(filename: __DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
