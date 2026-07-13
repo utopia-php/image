@@ -10,13 +10,18 @@
     "scripts": {
         "lint": "./vendor/bin/pint --test",
         "format": "./vendor/bin/pint",
-        "check": "./vendor/bin/phpstan analyse --level max src tests",
+        "check": "./vendor/bin/phpstan analyse --level max src tests --memory-limit=512M",
         "test": "phpunit"
     },
     "require": {
         "php": ">=8.1",
+        "ext-ffi": "*",
         "ext-imagick": "*",
-        "ext-gd": "*"
+        "ext-gd": "*",
+        "codewithkyrian/transformers": "^0.6.2",
+        "symfony/console": "^6.4",
+        "symfony/string": "^6.4",
+        "symfony/yaml": "^6.4"
     },
     "require-dev": {
         "phpunit/phpunit": "10.5.*",
@@ -25,6 +30,11 @@
     },
     "suggest": {
         "ext-imagick": "Imagick extension is required for Imagick adapter"
+    },
+    "config": {
+        "allow-plugins": {
+            "codewithkyrian/platform-package-installer": true
+        }
     },
     "minimum-stability": "dev"
 }

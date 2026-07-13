@@ -1,4 +1,5 @@
 /vendor/
+/.transformers-cache/
 /.vscode/
 .phpunit.result.cache
 .idea
