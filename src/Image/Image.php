@@ -2,10 +2,13 @@
 
 namespace Utopia\Image;
 
+use Codewithkyrian\Transformers\Pipelines\Pipeline;
 use Exception;
 use Imagick;
 use ImagickDraw;
 use ImagickPixel;
+
+use function Codewithkyrian\Transformers\Pipelines\pipeline;
 
 class Image
 {
@@ -40,6 +43,8 @@ class Image
     private string $borderColor = '';
 
     private int $rotation = 0;
+
+    private static ?Pipeline $focusDetector = null;
 
     /**
      * @throws \ImagickException
@@ -99,10 +104,13 @@ class Image
     /**
      * @throws \Throwable
      */
-    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
+    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER, ?string $focus = null): self
     {
+        $focus = trim($focus ?? '');
+
         // if no changes to Gravity, Width or Height, don't process image
-        if ($gravity === Image::GRAVITY_CENTER &&
+        if ($focus === '' &&
+            $gravity === Image::GRAVITY_CENTER &&
             (
                 (! empty($width) && ! empty($height)) &&
                 ($width == $this->width && $height == $this->height)
@@ -125,9 +133,12 @@ class Image
             $width = $this->width;
         }
 
+        $focusRegions = $focus === '' ? [] : $this->detectFocus($focus);
+        $hasFocus = $focusRegions !== [];
+
         $resizeWidth = $this->width;
         $resizeHeight = $this->height;
-        if ($gravity !== Image::GRAVITY_CENTER) {
+        if ($gravity !== Image::GRAVITY_CENTER || $hasFocus) {
             $targetAspect = $width / $height;
             if ($targetAspect > $originalAspect) {
                 $resizeWidth = $width;
@@ -139,40 +150,85 @@ class Image
         }
 
         $x = $y = 0;
-        switch ($gravity) {
-            case self::GRAVITY_TOP_LEFT:
-                $x = 0;
-                $y = 0;
-                break;
-            case self::GRAVITY_TOP:
-                $x = ($resizeWidth / 2) - ($width / 2);
-                break;
-            case self::GRAVITY_TOP_RIGHT:
-                $x = $resizeWidth - $width;
-                break;
-            case self::GRAVITY_LEFT:
-                $y = ($resizeHeight / 2) - ($height / 2);
-                break;
-            case self::GRAVITY_RIGHT:
-                $x = $resizeWidth - $width;
-                $y = ($resizeHeight / 2) - ($height / 2);
-                break;
-            case self::GRAVITY_BOTTOM_LEFT:
-                $x = 0;
-                $y = $resizeHeight - $height;
-                break;
-            case self::GRAVITY_BOTTOM:
-                $x = ($resizeWidth / 2) - ($width / 2);
-                $y = $resizeHeight - $height;
-                break;
-            case self::GRAVITY_BOTTOM_RIGHT:
-                $x = $resizeWidth - $width;
-                $y = $resizeHeight - $height;
-                break;
-            default:
-                $x = ($resizeWidth / 2) - ($width / 2);
-                $y = ($resizeHeight / 2) - ($height / 2);
-                break;
+        if ($hasFocus) {
+            $left = min(array_column($focusRegions, 'xmin'));
+            $top = min(array_column($focusRegions, 'ymin'));
+            $right = max(array_column($focusRegions, 'xmax'));
+            $bottom = max(array_column($focusRegions, 'ymax'));
+
+            if (($right - $left) * $resizeWidth <= $width && ($bottom - $top) * $resizeHeight <= $height) {
+                $candidates = [[($left + $right) / 2, ($top + $bottom) / 2]];
+            } else {
+                $candidates = [[($left + $right) / 2, ($top + $bottom) / 2], ...array_map(
+                    fn (array $region): array => [
+                        ($region['xmin'] + $region['xmax']) / 2,
+                        ($region['ymin'] + $region['ymax']) / 2,
+                    ],
+                    $focusRegions
+                )];
+            }
+
+            $bestScore = -1.0;
+            foreach ($candidates as [$candidateX, $candidateY]) {
+                $candidateLeft = max(0, min($resizeWidth - $width, ($candidateX * $resizeWidth) - ($width / 2)));
+                $candidateTop = max(0, min($resizeHeight - $height, ($candidateY * $resizeHeight) - ($height / 2)));
+                $candidateRight = $candidateLeft + $width;
+                $candidateBottom = $candidateTop + $height;
+                $score = 0.0;
+
+                foreach ($focusRegions as $region) {
+                    $regionLeft = $region['xmin'] * $resizeWidth;
+                    $regionTop = $region['ymin'] * $resizeHeight;
+                    $regionRight = $region['xmax'] * $resizeWidth;
+                    $regionBottom = $region['ymax'] * $resizeHeight;
+                    $intersectionWidth = max(0, min($candidateRight, $regionRight) - max($candidateLeft, $regionLeft));
+                    $intersectionHeight = max(0, min($candidateBottom, $regionBottom) - max($candidateTop, $regionTop));
+                    $regionArea = ($regionRight - $regionLeft) * ($regionBottom - $regionTop);
+                    $score += ($intersectionWidth * $intersectionHeight / $regionArea) * $region['score'];
+                }
+
+                if ($score > $bestScore) {
+                    $bestScore = $score;
+                    $x = $candidateLeft;
+                    $y = $candidateTop;
+                }
+            }
+        } else {
+            switch ($gravity) {
+                case self::GRAVITY_TOP_LEFT:
+                    $x = 0;
+                    $y = 0;
+                    break;
+                case self::GRAVITY_TOP:
+                    $x = ($resizeWidth / 2) - ($width / 2);
+                    break;
+                case self::GRAVITY_TOP_RIGHT:
+                    $x = $resizeWidth - $width;
+                    break;
+                case self::GRAVITY_LEFT:
+                    $y = ($resizeHeight / 2) - ($height / 2);
+                    break;
+                case self::GRAVITY_RIGHT:
+                    $x = $resizeWidth - $width;
+                    $y = ($resizeHeight / 2) - ($height / 2);
+                    break;
+                case self::GRAVITY_BOTTOM_LEFT:
+                    $x = 0;
+                    $y = $resizeHeight - $height;
+                    break;
+                case self::GRAVITY_BOTTOM:
+                    $x = ($resizeWidth / 2) - ($width / 2);
+                    $y = $resizeHeight - $height;
+                    break;
+                case self::GRAVITY_BOTTOM_RIGHT:
+                    $x = $resizeWidth - $width;
+                    $y = $resizeHeight - $height;
+                    break;
+                default:
+                    $x = ($resizeWidth / 2) - ($width / 2);
+                    $y = ($resizeHeight / 2) - ($height / 2);
+                    break;
+            }
         }
         $x = intval($x);
         $y = intval($y);
@@ -181,7 +237,7 @@ class Image
             $this->image = $this->image->coalesceImages();
 
             foreach ($this->image as $frame) {
-                if ($gravity === self::GRAVITY_CENTER) {
+                if ($gravity === self::GRAVITY_CENTER && ! $hasFocus) {
                     $frame->cropThumbnailImage($width, $height);
                 } else {
                     $frame->scaleImage($resizeWidth, $resizeHeight, false);
@@ -193,7 +249,7 @@ class Image
             $this->image->deconstructImages();
         } else {
             foreach ($this->image as $frame) {
-                if ($gravity === self::GRAVITY_CENTER) {
+                if ($gravity === self::GRAVITY_CENTER && ! $hasFocus) {
                     $this->image->cropThumbnailImage($width, $height);
                 } else {
                     $this->image->scaleImage($resizeWidth, $resizeHeight, false);
@@ -205,6 +261,61 @@ class Image
         $this->width = $width;
 
         return $this;
+    }
+
+    /**
+     * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
+     */
+    protected function detectFocus(string $focus): array
+    {
+        self::$focusDetector ??= pipeline('zero-shot-object-detection');
+
+        $path = tempnam(sys_get_temp_dir(), 'utopia-image-focus-');
+        if ($path === false) {
+            throw new Exception('Failed to create image for focus detection');
+        }
+
+        try {
+            if (file_put_contents($path, $this->image->getImageBlob(), LOCK_EX) === false) {
+                throw new Exception('Failed to create image for focus detection');
+            }
+
+            $detections = (self::$focusDetector)($path, [$focus], threshold: 0.1, percentage: true, topK: PHP_INT_MAX);
+        } finally {
+            @unlink($path);
+        }
+
+        if (! is_array($detections)) {
+            return [];
+        }
+
+        $regions = [];
+        foreach ($detections as $detection) {
+            if (! is_array($detection) || ! isset($detection['box']) || ! is_array($detection['box'])) {
+                continue;
+            }
+
+            $box = $detection['box'];
+            if (! isset($box['xmin'], $box['ymin'], $box['xmax'], $box['ymax'])) {
+                continue;
+            }
+            if (! is_numeric($box['xmin']) || ! is_numeric($box['ymin']) || ! is_numeric($box['xmax']) || ! is_numeric($box['ymax'])) {
+                continue;
+            }
+
+            $xmin = max(0.0, min(1.0, (float) $box['xmin']));
+            $ymin = max(0.0, min(1.0, (float) $box['ymin']));
+            $xmax = max(0.0, min(1.0, (float) $box['xmax']));
+            $ymax = max(0.0, min(1.0, (float) $box['ymax']));
+            $score = isset($detection['score']) && is_numeric($detection['score']) ? (float) $detection['score'] : 1.0;
+            if ($xmin >= $xmax || $ymin >= $ymax) {
+                continue;
+            }
+
+            $regions[] = compact('xmin', 'ymin', 'xmax', 'ymax', 'score');
+        }
+
+        return $regions;
     }
 
     /**

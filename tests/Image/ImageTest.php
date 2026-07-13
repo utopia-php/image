@@ -397,6 +397,126 @@ class ImageTest extends TestCase
         }], $color[$expectedChannel]);
     }
 
+    public function test_crop_focus_uses_detected_region(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            public string $focus = '';
+
+            /**
+             * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
+             */
+            protected function detectFocus(string $focus): array
+            {
+                $this->focus = $focus;
+
+                return [['xmin' => 0.67, 'ymin' => 0.0, 'xmax' => 1.0, 'ymax' => 1.0, 'score' => 0.9]];
+            }
+        };
+
+        $image->crop(2, 2, focus: 'blue object');
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertSame('blue object', $image->focus);
+        $this->assertGreaterThan($color['r'], $color['b']);
+        $this->assertGreaterThan($color['g'], $color['b']);
+    }
+
+    public function test_crop_focus_keeps_all_regions_when_possible(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            /**
+             * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
+             */
+            protected function detectFocus(string $focus): array
+            {
+                return [
+                    ['xmin' => 0.0, 'ymin' => 0.0, 'xmax' => 0.32, 'ymax' => 1.0, 'score' => 0.8],
+                    ['xmin' => 0.34, 'ymin' => 0.0, 'xmax' => 0.65, 'ymax' => 1.0, 'score' => 0.7],
+                ];
+            }
+        };
+
+        $image->crop(4, 2, focus: 'subjects');
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $left = $result->getImagePixelColor(0, 1)->getColor();
+        $right = $result->getImagePixelColor(3, 1)->getColor();
+
+        $this->assertGreaterThan($left['g'], $left['r']);
+        $this->assertGreaterThan($right['r'], $right['g']);
+        $this->assertGreaterThan($right['b'], $right['g']);
+    }
+
+    public function test_crop_focus_prioritizes_stronger_region_when_all_cannot_fit(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            /**
+             * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
+             */
+            protected function detectFocus(string $focus): array
+            {
+                return [
+                    ['xmin' => 0.0, 'ymin' => 0.0, 'xmax' => 0.32, 'ymax' => 1.0, 'score' => 0.2],
+                    ['xmin' => 0.68, 'ymin' => 0.0, 'xmax' => 1.0, 'ymax' => 1.0, 'score' => 0.9],
+                ];
+            }
+        };
+
+        $image->crop(2, 2, focus: 'subjects');
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertGreaterThan($color['r'], $color['b']);
+        $this->assertGreaterThan($color['g'], $color['b']);
+    }
+
+    public function test_crop_focus_uses_gravity_when_nothing_is_detected(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            /**
+             * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
+             */
+            protected function detectFocus(string $focus): array
+            {
+                return [];
+            }
+        };
+
+        $image->crop(2, 2, Image::GRAVITY_LEFT, focus: 'missing object');
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertGreaterThan($color['g'], $color['r']);
+        $this->assertGreaterThan($color['b'], $color['r']);
+    }
+
+    private function createHorizontalStripeImage(): string
+    {
+        $source = new \Imagick;
+        $source->newImage(6, 2, 'red', 'png');
+
+        $draw = new \ImagickDraw;
+        $draw->setFillColor('green');
+        $draw->rectangle(2, 0, 3, 1);
+        $draw->setFillColor('blue');
+        $draw->rectangle(4, 0, 5, 1);
+        $source->drawImage($draw);
+
+        return $source->getImageBlob();
+    }
+
     public function test_crop100x400(): void
     {
         $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
