@@ -1,5 +1,6 @@
 /vendor/
 /.transformers-cache/
+/examples/focus-crop/
 /.vscode/
 .phpunit.result.cache
 .idea
