@@ -2,6 +2,7 @@
 
 namespace Appwrite\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Utopia\Image\Image;
 
@@ -315,6 +316,85 @@ class ImageTest extends TestCase
         $this->assertEquals('JPEG', $image->getImageFormat());
 
         \unlink($target);
+    }
+
+    public function test_crop_gravity_preserves_aspect_ratio(): void
+    {
+        $source = new \Imagick;
+        $source->newImage(2, 4, 'red', 'png');
+
+        $draw = new \ImagickDraw;
+        $draw->setFillColor('blue');
+        $draw->rectangle(0, 2, 1, 3);
+        $source->drawImage($draw);
+
+        $image = new Image($source->getImageBlob());
+        $image->crop(4, 2, Image::GRAVITY_TOP);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(2, 1)->getColor();
+
+        $this->assertGreaterThan($color['b'], $color['r']);
+    }
+
+    /**
+     * @return array<string, array{string, bool, string}>
+     */
+    public static function gravityProvider(): array
+    {
+        return [
+            'horizontal top-left' => [Image::GRAVITY_TOP_LEFT, true, 'r'],
+            'horizontal top' => [Image::GRAVITY_TOP, true, 'g'],
+            'horizontal top-right' => [Image::GRAVITY_TOP_RIGHT, true, 'b'],
+            'horizontal left' => [Image::GRAVITY_LEFT, true, 'r'],
+            'horizontal center' => [Image::GRAVITY_CENTER, true, 'g'],
+            'horizontal right' => [Image::GRAVITY_RIGHT, true, 'b'],
+            'horizontal bottom-left' => [Image::GRAVITY_BOTTOM_LEFT, true, 'r'],
+            'horizontal bottom' => [Image::GRAVITY_BOTTOM, true, 'g'],
+            'horizontal bottom-right' => [Image::GRAVITY_BOTTOM_RIGHT, true, 'b'],
+            'vertical top-left' => [Image::GRAVITY_TOP_LEFT, false, 'r'],
+            'vertical top' => [Image::GRAVITY_TOP, false, 'r'],
+            'vertical top-right' => [Image::GRAVITY_TOP_RIGHT, false, 'r'],
+            'vertical left' => [Image::GRAVITY_LEFT, false, 'g'],
+            'vertical center' => [Image::GRAVITY_CENTER, false, 'g'],
+            'vertical right' => [Image::GRAVITY_RIGHT, false, 'g'],
+            'vertical bottom-left' => [Image::GRAVITY_BOTTOM_LEFT, false, 'b'],
+            'vertical bottom' => [Image::GRAVITY_BOTTOM, false, 'b'],
+            'vertical bottom-right' => [Image::GRAVITY_BOTTOM_RIGHT, false, 'b'],
+        ];
+    }
+
+    #[DataProvider('gravityProvider')]
+    public function test_crop_gravity_positions(string $gravity, bool $horizontal, string $expectedChannel): void
+    {
+        $source = new \Imagick;
+        $source->newImage($horizontal ? 6 : 2, $horizontal ? 2 : 6, 'red', 'png');
+
+        $draw = new \ImagickDraw;
+        $draw->setFillColor('green');
+        $draw->rectangle($horizontal ? 2 : 0, $horizontal ? 0 : 2, $horizontal ? 3 : 1, $horizontal ? 1 : 3);
+        $draw->setFillColor('blue');
+        $draw->rectangle($horizontal ? 4 : 0, $horizontal ? 0 : 4, $horizontal ? 5 : 1, $horizontal ? 1 : 5);
+        $source->drawImage($draw);
+
+        $image = new Image($source->getImageBlob());
+        $image->crop(2, 2, $gravity);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertSame(2, $result->getImageWidth());
+        $this->assertSame(2, $result->getImageHeight());
+        $this->assertGreaterThan($color[match ($expectedChannel) {
+            'r' => 'g',
+            default => 'r',
+        }], $color[$expectedChannel]);
+        $this->assertGreaterThan($color[match ($expectedChannel) {
+            'b' => 'g',
+            default => 'b',
+        }], $color[$expectedChannel]);
     }
 
     public function test_crop100x400(): void

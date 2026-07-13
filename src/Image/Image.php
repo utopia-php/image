@@ -128,11 +128,12 @@ class Image
         $resizeWidth = $this->width;
         $resizeHeight = $this->height;
         if ($gravity !== Image::GRAVITY_CENTER) {
-            if ($width > $height) {
+            $targetAspect = $width / $height;
+            if ($targetAspect > $originalAspect) {
                 $resizeWidth = $width;
-                $resizeHeight = intval($width * $originalAspect);
+                $resizeHeight = intval(ceil($width / $originalAspect));
             } else {
-                $resizeWidth = intval($height * $originalAspect);
+                $resizeWidth = intval(ceil($height * $originalAspect));
                 $resizeHeight = $height;
             }
         }
