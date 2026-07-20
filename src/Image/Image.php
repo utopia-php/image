@@ -177,7 +177,7 @@ class Image
         $x = intval($x);
         $y = intval($y);
 
-        if ($this->image->getImageFormat() == 'GIF') {
+        if ($this->image->getNumberImages() > 1) {
             $this->image = $this->image->coalesceImages();
 
             foreach ($this->image as $frame) {
@@ -188,18 +188,14 @@ class Image
                     $frame->cropImage($width, $height, $x, $y);
                     $frame->thumbnailImage($width, $height);
                 }
-            }
 
-            $this->image->deconstructImages();
-        } else {
-            foreach ($this->image as $frame) {
-                if ($gravity === self::GRAVITY_CENTER) {
-                    $this->image->cropThumbnailImage($width, $height);
-                } else {
-                    $this->image->scaleImage($resizeWidth, $resizeHeight, false);
-                    $this->image->cropImage($width, $height, $x, $y);
-                }
+                $frame->setImagePage($width, $height, 0, 0);
             }
+        } elseif ($gravity === self::GRAVITY_CENTER) {
+            $this->image->cropThumbnailImage($width, $height);
+        } else {
+            $this->image->scaleImage($resizeWidth, $resizeHeight, false);
+            $this->image->cropImage($width, $height, $x, $y);
         }
         $this->height = $height;
         $this->width = $width;
