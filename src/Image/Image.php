@@ -177,7 +177,11 @@ class Image
         $x = intval($x);
         $y = intval($y);
 
-        if ($this->image->getImageFormat() == 'GIF') {
+        // Animated formats (GIF, WebP, etc.) store delta/partial frames. Resize
+        // each coalesced full frame, then deconstruct back to dirty rectangles.
+        // Without coalesce, partial frames are scaled independently and produce
+        // blocky ghosting artifacts — especially visible on animated WebP.
+        if ($this->image->getNumberImages() > 1) {
             $this->image = $this->image->coalesceImages();
 
             foreach ($this->image as $frame) {
@@ -188,19 +192,18 @@ class Image
                     $frame->cropImage($width, $height, $x, $y);
                     $frame->thumbnailImage($width, $height);
                 }
+
+                $frame->setImagePage($width, $height, 0, 0);
             }
 
             $this->image->deconstructImages();
+        } elseif ($gravity === self::GRAVITY_CENTER) {
+            $this->image->cropThumbnailImage($width, $height);
         } else {
-            foreach ($this->image as $frame) {
-                if ($gravity === self::GRAVITY_CENTER) {
-                    $this->image->cropThumbnailImage($width, $height);
-                } else {
-                    $this->image->scaleImage($resizeWidth, $resizeHeight, false);
-                    $this->image->cropImage($width, $height, $x, $y);
-                }
-            }
+            $this->image->scaleImage($resizeWidth, $resizeHeight, false);
+            $this->image->cropImage($width, $height, $x, $y);
         }
+
         $this->height = $height;
         $this->width = $width;
 

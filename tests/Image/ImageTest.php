@@ -859,4 +859,48 @@ class ImageTest extends TestCase
 
         \unlink($target);
     }
+
+    /**
+     * Animated WebP stores delta/partial frames. Cropping without coalesce
+     * scales those fragments independently and produces ghosting artifacts.
+     */
+    public function test_crop_animated_webp_preserves_frames(): void
+    {
+        $source = __DIR__.'/../resources/disk-a/anim-delta.webp';
+        $image = new Image(\file_get_contents($source) ?: '');
+        $target = __DIR__.'/anim-delta-32x32.webp';
+
+        $image->crop(32, 32);
+        $image->save($target, 'webp', 100);
+
+        $this->assertFileExists($target);
+        $this->assertNotEmpty(\file_get_contents($target));
+
+        $output = new \Imagick($target);
+        $this->assertGreaterThan(1, $output->getNumberImages());
+        $this->assertTrue(\in_array($output->getImageFormat(), ['PAM', 'WEBP'], true));
+
+        $coalesced = $output->coalesceImages();
+        foreach ($coalesced as $frame) {
+            $this->assertEquals(32, $frame->getImageWidth());
+            $this->assertEquals(32, $frame->getImageHeight());
+        }
+
+        // Frame 0 has a red square near the top-left; after a correct resize
+        // that region must stay red — not blended with later frames.
+        $coalesced->setFirstIterator();
+        $pixel = $coalesced->getImagePixelColor(8, 8)->getColor();
+        $this->assertGreaterThan(200, $pixel['r']);
+        $this->assertLessThan(100, $pixel['g']);
+        $this->assertLessThan(100, $pixel['b']);
+
+        // Frame 1 replaces that region with green on a correct crop.
+        $coalesced->nextImage();
+        $pixel = $coalesced->getImagePixelColor(8, 8)->getColor();
+        $this->assertLessThan(100, $pixel['r']);
+        $this->assertGreaterThan(180, $pixel['g']);
+        $this->assertLessThan(150, $pixel['b']);
+
+        \unlink($target);
+    }
 }
