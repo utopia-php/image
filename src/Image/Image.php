@@ -46,7 +46,7 @@ class Image
      */
     public function __construct(string $data)
     {
-        $this->image = new Imagick;
+        $this->image = new Imagick();
 
         $this->image->readImageBlob($data);
 
@@ -102,25 +102,25 @@ class Image
     public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
     {
         // if no changes to Gravity, Width or Height, don't process image
-        if ($gravity === Image::GRAVITY_CENTER &&
-            (
-                (! empty($width) && ! empty($height)) &&
-                ($width == $this->width && $height == $this->height)
+        if ($gravity === Image::GRAVITY_CENTER
+            && (
+                ($width !== 0 && $height !== 0)
+                && ($width === $this->width && $height === $this->height)
             )) {
             return $this;
         }
 
         $originalAspect = $this->width / $this->height;
 
-        if (empty($width)) {
-            $width = intval($height * $originalAspect);
+        if ($width === 0) {
+            $width = \intval($height * $originalAspect);
         }
 
-        if (empty($height)) {
-            $height = intval($width / $originalAspect);
+        if ($height === 0) {
+            $height = \intval($width / $originalAspect);
         }
 
-        if (empty($height) && empty($width)) {
+        if ($height === 0 && $width === 0) {
             $height = $this->height;
             $width = $this->width;
         }
@@ -131,9 +131,9 @@ class Image
             $targetAspect = $width / $height;
             if ($targetAspect > $originalAspect) {
                 $resizeWidth = $width;
-                $resizeHeight = intval(ceil($width / $originalAspect));
+                $resizeHeight = \intval(ceil($width / $originalAspect));
             } else {
-                $resizeWidth = intval(ceil($height * $originalAspect));
+                $resizeWidth = \intval(ceil($height * $originalAspect));
                 $resizeHeight = $height;
             }
         }
@@ -174,8 +174,8 @@ class Image
                 $y = ($resizeHeight / 2) - ($height / 2);
                 break;
         }
-        $x = intval($x);
-        $y = intval($y);
+        $x = \intval($x);
+        $y = \intval($y);
 
         if ($this->image->getNumberImages() > 1) {
             $this->image = $this->image->coalesceImages();
@@ -214,7 +214,7 @@ class Image
         $this->borderWidth = $borderWidth;
         $this->borderColor = $borderColor;
 
-        if (! empty($this->cornerRadius)) {
+        if ($this->cornerRadius !== 0) {
             return $this;
         }
         $this->image->borderImage($borderColor, $borderWidth, $borderWidth);
@@ -232,13 +232,13 @@ class Image
      */
     public function setBorderRadius(int $cornerRadius): self
     {
-        $mask = new Imagick;
+        $mask = new Imagick();
         $mask->newImage($this->width, $this->height, new ImagickPixel('transparent'), 'png');
 
         $rectwidth = ($this->borderWidth > 0 ? ($this->width - ($this->borderWidth + 1)) : $this->width - 1);
         $rectheight = ($this->borderWidth > 0 ? ($this->height - ($this->borderWidth + 1)) : $this->height - 1);
 
-        $shape = new ImagickDraw;
+        $shape = new ImagickDraw();
         $shape->setFillColor(new ImagickPixel('black'));
         $shape->roundRectangle($this->borderWidth, $this->borderWidth, $rectwidth, $rectheight, $cornerRadius, $cornerRadius);
 
@@ -246,13 +246,13 @@ class Image
         $this->image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
 
         if ($this->borderWidth > 0) {
-            $bc = new ImagickPixel;
+            $bc = new ImagickPixel();
             $bc->setColor($this->borderColor);
 
-            $strokeCanvas = new Imagick;
+            $strokeCanvas = new Imagick();
             $strokeCanvas->newImage($this->width, $this->height, new ImagickPixel('transparent'), 'png');
 
-            $shape2 = new ImagickDraw;
+            $shape2 = new ImagickDraw();
             $shape2->setFillColor(new ImagickPixel('transparent'));
             $shape2->setStrokeWidth($this->borderWidth);
             $shape2->setStrokeColor($bc);
@@ -277,7 +277,12 @@ class Image
         if ($opacity == 1) {
             return $this;
         }
-        $this->image->setImageAlpha($opacity);
+        $this->image->setImageAlphaChannel(Imagick::ALPHACHANNEL_OPAQUE);
+        if ($opacity === 0.0) {
+            $this->image->evaluateImage(Imagick::EVALUATE_SET, 0, Imagick::CHANNEL_ALPHA);
+        } else {
+            $this->image->evaluateImage(Imagick::EVALUATE_DIVIDE, 1 / $opacity, Imagick::CHANNEL_ALPHA);
+        }
 
         return $this;
     }
@@ -292,7 +297,7 @@ class Image
      */
     public function setRotation(int $degree): self
     {
-        if ($degree == 0) {
+        if ($degree === 0) {
             return $this;
         }
 
@@ -303,11 +308,10 @@ class Image
 
     /**
      * @param  mixed  $color
-     * @return Image
      *
      * @throws \Throwable
      */
-    public function setBackground($color)
+    public function setBackground($color): static
     {
         $this->image->setImageBackgroundColor($color);
         $this->image = $this->image->mergeImageLayers(Imagick::LAYERMETHOD_FLATTEN);
@@ -320,32 +324,27 @@ class Image
      *
      * Prints manipulated image.
      *
-     * @return false|null|string
-     *
      * @throws Exception
      */
-    public function output(string $type, int $quality = 75)
+    public function output(string $type, int $quality = 75): ?string
     {
         return $this->save(null, $type, $quality);
     }
 
     /**
-     * @return ($path is null ? string|false : void)
-     *
      * @throws Exception
      */
-    public function save(?string $path = null, string $type = '', int $quality = 75)
+    public function save(?string $path = null, string $type = '', int $quality = 75): ?string
     {
         // Create directory with write permissions
-        if ($path !== null && ! \file_exists(\dirname($path))) {
-            if (! @\mkdir(\dirname($path), 0755, true)) {
-                throw new Exception('Can\'t create directory '.\dirname($path));
-            }
+        if ($path !== null && !file_exists(\dirname($path)) && ! @mkdir(\dirname($path), 0755, true)) {
+            throw new Exception('Can\'t create directory ' . \dirname($path));
         }
 
         // Apply original metadata rotation
-        if ($this->rotation != 0) {
+        if ($this->rotation !== 0) {
             $this->image->rotateImage('transparent', $this->rotation);
+            $this->rotation = 0;
         }
 
         switch ($type) {
@@ -366,6 +365,14 @@ class Image
             case 'heic':
                 $this->image->setImageFormat($type);
                 if ($quality >= 0) {
+                    // AOM rejects lossless AVIF when chroma delta-Q is enabled
+                    // by some libheif/AOM combinations. ImageMagick maps 100
+                    // to lossless mode, so keep the highest AVIF quality lossy
+                    // for portable encoding.
+                    if ($type === 'avif') {
+                        $quality = min($quality, 99);
+                    }
+
                     // setImageCompressionQuality() is silently ignored by the libheif coder —
                     // setCompressionQuality() (object-level, not image-level) must be called
                     // after setImageFormat() for quality to take effect on AVIF/HEIC output.
@@ -384,9 +391,9 @@ class Image
             case 'png':
                 if ($quality >= 0) {
                     /* Scale quality from 0-100 to 0-9 */
-                    $scaleQuality = \round(($quality / 100) * 9);
+                    $scaleQuality = round(($quality / 100) * 9);
                     /* Invert quality setting as 0 is best, not 9 */
-                    $invertScaleQuality = intval(9 - $scaleQuality);
+                    $invertScaleQuality = \intval(9 - $scaleQuality);
                     $this->image->setImageCompressionQuality($invertScaleQuality);
                 }
                 $this->image->setImageFormat('png');
@@ -396,14 +403,12 @@ class Image
                 throw new Exception('Invalid output type given');
         }
 
-        if (empty($path)) {
+        if ($path === null || $path === '') {
             return $this->image->getImagesBlob();
-        } else {
-            $this->image->writeImages($path, true);
         }
+        $this->image->writeImages($path, true);
 
-        $this->image->clear();
-        $this->image->destroy();
+        return null;
     }
 
     protected function getSizeByFixedHeight(int $newHeight): int
@@ -411,7 +416,7 @@ class Image
         $ratio = $this->width / $this->height;
         $newWidth = $newHeight * $ratio;
 
-        return intval($newWidth);
+        return \intval($newWidth);
     }
 
     protected function getSizeByFixedWidth(int $newWidth): int
@@ -419,7 +424,7 @@ class Image
         $ratio = $this->height / $this->width;
         $newHeight = $newWidth * $ratio;
 
-        return intval($newHeight);
+        return \intval($newHeight);
     }
 
     public static function setResourceLimit(string $type, int $value): void

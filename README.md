@@ -1,15 +1,17 @@
 # Utopia Image
 
-[![Build Status](https://travis-ci.org/utopia-php/ab.svg?branch=master)](https://travis-ci.com/utopia-php/image)
+> [!IMPORTANT]
+> This repository is a read-only mirror of the [utopia-php monorepo](https://github.com/utopia-php/monorepo). Development happens in [`packages/image`](https://github.com/utopia-php/monorepo/tree/main/packages/image) — please open issues and pull requests there.
+
 ![Total Downloads](https://img.shields.io/packagist/dt/utopia-php/image.svg)
 [![Discord](https://img.shields.io/discord/564160730845151244?label=discord)](https://appwrite.io/discord)
 
-Utopia Image library isLite &amp; fast micro PHP library for creating common image manipulations that is **easy to use**. This library is maintained by the [Appwrite team](https://appwrite.io).
+Utopia Image is a lightweight PHP library for common image manipulations. It is maintained by the [Appwrite team](https://appwrite.io).
 
+## Getting started
 
-## Getting Started
+Install using Composer:
 
-Install using composer:
 ```bash
 composer require utopia-php/image
 ```
@@ -24,7 +26,7 @@ use Utopia\Image\Image;
 //crop image
 $image = new Image(\file_get_contents('image.jpg'));
 $target = 'image_100x100.jpg';
-$image->crop(100, 100, Image::GRAVITY_NORTHWEST);
+$image->crop(100, 100, Image::GRAVITY_TOP_LEFT);
 $image->save($target, 'jpg', 100);
 
 $image = new Image(\file_get_contents('image.jpg'));
@@ -41,9 +43,9 @@ $image->save($target, 'png', 100);
 
 ```
 
-## System Requirements
+## System requirements
 
-Utopia Image requires PHP 8.0 or later. We recommend using the latest PHP version whenever possible.
+Utopia Image requires PHP 8.1 or later. We recommend using the latest PHP version whenever possible.
 
 ## Copyright and license
 
