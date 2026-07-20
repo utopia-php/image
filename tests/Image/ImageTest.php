@@ -903,4 +903,46 @@ class ImageTest extends TestCase
 
         \unlink($target);
     }
+
+    /**
+     * Consecutive identical frames are hold/pause frames. Cropping must keep
+     * total playback delay — deconstructImages() + WebP encode can zero it out.
+     */
+    public function test_crop_animated_webp_preserves_hold_frames(): void
+    {
+        $sequence = new \Imagick;
+        foreach (['#ff0000', '#ff0000', '#0000ff'] as $color) {
+            $frame = new \Imagick;
+            $frame->newImage(40, 40, new \ImagickPixel($color));
+            $frame->setImageDelay(40);
+            $frame->setImageDispose(\Imagick::DISPOSE_NONE);
+            $frame->setImageFormat('gif');
+            $sequence->addImage($frame);
+        }
+
+        $blob = $sequence->getImagesBlob();
+        $this->assertNotFalse($blob);
+
+        $image = new Image($blob);
+        $image->crop(20, 20);
+        $outputBlob = $image->output('webp', 100);
+        $this->assertNotFalse($outputBlob);
+        $this->assertNotNull($outputBlob);
+
+        $output = new \Imagick;
+        $output->readImageBlob($outputBlob);
+
+        $totalDelay = 0;
+        foreach ($output as $frame) {
+            $totalDelay += $frame->getImageDelay();
+        }
+        $this->assertEquals(120, $totalDelay);
+        $this->assertGreaterThanOrEqual(2, $output->getNumberImages());
+
+        $coalesced = $output->coalesceImages();
+        foreach ($coalesced as $frame) {
+            $this->assertEquals(20, $frame->getImageWidth());
+            $this->assertEquals(20, $frame->getImageHeight());
+        }
+    }
 }
