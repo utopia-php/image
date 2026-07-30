@@ -2,16 +2,16 @@
 
 namespace Utopia\Image;
 
-use Codewithkyrian\Transformers\Pipelines\Pipeline;
 use Exception;
 use Imagick;
 use ImagickDraw;
 use ImagickPixel;
-
-use function Codewithkyrian\Transformers\Pipelines\pipeline;
+use OnnxRuntime\Model;
 
 class Image
 {
+    public const GRAVITY_AUTO = 'auto';
+
     public const GRAVITY_CENTER = 'center';
 
     public const GRAVITY_TOP_LEFT = 'top-left';
@@ -44,7 +44,7 @@ class Image
 
     private int $rotation = 0;
 
-    private static ?Pipeline $focusDetector = null;
+    private static ?Model $saliencyModel = null;
 
     /**
      * @throws \ImagickException
@@ -89,6 +89,7 @@ class Image
     public static function getGravityTypes(): array
     {
         return [
+            Image::GRAVITY_AUTO,
             Image::GRAVITY_CENTER,
             Image::GRAVITY_TOP_LEFT,
             Image::GRAVITY_TOP,
@@ -104,13 +105,10 @@ class Image
     /**
      * @throws \Throwable
      */
-    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER, ?string $focus = null): self
+    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
     {
-        $focus = trim($focus ?? '');
-
         // if no changes to Gravity, Width or Height, don't process image
-        if ($focus === '' &&
-            $gravity === Image::GRAVITY_CENTER &&
+        if (($gravity === Image::GRAVITY_CENTER || $gravity === Image::GRAVITY_AUTO) &&
             (
                 (! empty($width) && ! empty($height)) &&
                 ($width == $this->width && $height == $this->height)
@@ -133,12 +131,9 @@ class Image
             $width = $this->width;
         }
 
-        $focusRegions = $focus === '' ? [] : $this->detectFocus($focus);
-        $hasFocus = $focusRegions !== [];
-
         $resizeWidth = $this->width;
         $resizeHeight = $this->height;
-        if ($gravity !== Image::GRAVITY_CENTER || $hasFocus) {
+        if ($gravity !== Image::GRAVITY_CENTER) {
             $targetAspect = $width / $height;
             if ($targetAspect > $originalAspect) {
                 $resizeWidth = $width;
@@ -150,49 +145,14 @@ class Image
         }
 
         $x = $y = 0;
-        if ($hasFocus) {
-            $left = min(array_column($focusRegions, 'xmin'));
-            $top = min(array_column($focusRegions, 'ymin'));
-            $right = max(array_column($focusRegions, 'xmax'));
-            $bottom = max(array_column($focusRegions, 'ymax'));
-
-            if (($right - $left) * $resizeWidth <= $width && ($bottom - $top) * $resizeHeight <= $height) {
-                $candidates = [[($left + $right) / 2, ($top + $bottom) / 2]];
-            } else {
-                $candidates = [[($left + $right) / 2, ($top + $bottom) / 2], ...array_map(
-                    fn (array $region): array => [
-                        ($region['xmin'] + $region['xmax']) / 2,
-                        ($region['ymin'] + $region['ymax']) / 2,
-                    ],
-                    $focusRegions
-                )];
-            }
-
-            $bestScore = -1.0;
-            foreach ($candidates as [$candidateX, $candidateY]) {
-                $candidateLeft = max(0, min($resizeWidth - $width, ($candidateX * $resizeWidth) - ($width / 2)));
-                $candidateTop = max(0, min($resizeHeight - $height, ($candidateY * $resizeHeight) - ($height / 2)));
-                $candidateRight = $candidateLeft + $width;
-                $candidateBottom = $candidateTop + $height;
-                $score = 0.0;
-
-                foreach ($focusRegions as $region) {
-                    $regionLeft = $region['xmin'] * $resizeWidth;
-                    $regionTop = $region['ymin'] * $resizeHeight;
-                    $regionRight = $region['xmax'] * $resizeWidth;
-                    $regionBottom = $region['ymax'] * $resizeHeight;
-                    $intersectionWidth = max(0, min($candidateRight, $regionRight) - max($candidateLeft, $regionLeft));
-                    $intersectionHeight = max(0, min($candidateBottom, $regionBottom) - max($candidateTop, $regionTop));
-                    $regionArea = ($regionRight - $regionLeft) * ($regionBottom - $regionTop);
-                    $score += ($intersectionWidth * $intersectionHeight / $regionArea) * $region['score'];
-                }
-
-                if ($score > $bestScore) {
-                    $bestScore = $score;
-                    $x = $candidateLeft;
-                    $y = $candidateTop;
-                }
-            }
+        if ($gravity === self::GRAVITY_AUTO) {
+            [$maskX, $maskY] = $this->findSalientCrop(
+                $this->detectSaliency(),
+                max(1, intval(round(320 * $width / $resizeWidth))),
+                max(1, intval(round(320 * $height / $resizeHeight)))
+            );
+            $x = min($resizeWidth - $width, $maskX * $resizeWidth / 320);
+            $y = min($resizeHeight - $height, $maskY * $resizeHeight / 320);
         } else {
             switch ($gravity) {
                 case self::GRAVITY_TOP_LEFT:
@@ -237,7 +197,7 @@ class Image
             $this->image = $this->image->coalesceImages();
 
             foreach ($this->image as $frame) {
-                if ($gravity === self::GRAVITY_CENTER && ! $hasFocus) {
+                if ($gravity === self::GRAVITY_CENTER) {
                     $frame->cropThumbnailImage($width, $height);
                 } else {
                     $frame->scaleImage($resizeWidth, $resizeHeight, false);
@@ -249,7 +209,7 @@ class Image
             $this->image->deconstructImages();
         } else {
             foreach ($this->image as $frame) {
-                if ($gravity === self::GRAVITY_CENTER && ! $hasFocus) {
+                if ($gravity === self::GRAVITY_CENTER) {
                     $this->image->cropThumbnailImage($width, $height);
                 } else {
                     $this->image->scaleImage($resizeWidth, $resizeHeight, false);
@@ -264,58 +224,134 @@ class Image
     }
 
     /**
-     * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
+     * @return list<list<float>>
      */
-    protected function detectFocus(string $focus): array
+    protected function detectSaliency(): array
     {
-        self::$focusDetector ??= pipeline('zero-shot-object-detection');
+        self::$saliencyModel ??= new Model(dirname(__DIR__, 2).'/resources/models/u2net.onnx');
 
-        $path = tempnam(sys_get_temp_dir(), 'utopia-image-focus-');
-        if ($path === false) {
-            throw new Exception('Failed to create image for focus detection');
+        $image = clone $this->image;
+        $image->setFirstIterator();
+        $image = $image->getImage();
+        $image->setImageBackgroundColor('white');
+        $image->setImageAlphaChannel(Imagick::ALPHACHANNEL_REMOVE);
+        $image->transformImageColorspace(Imagick::COLORSPACE_RGB);
+        $image->resizeImage(320, 320, Imagick::FILTER_LANCZOS, 1, false);
+
+        /** @var non-empty-list<int> $pixels */
+        $pixels = $image->exportImagePixels(0, 0, 320, 320, 'RGB', Imagick::PIXEL_CHAR);
+        $maximumPixel = max(1, max($pixels));
+        $channels = [[], [], []];
+        $means = [0.485, 0.456, 0.406];
+        $deviations = [0.229, 0.224, 0.225];
+        for ($y = 0; $y < 320; $y++) {
+            $rows = [[], [], []];
+            for ($x = 0; $x < 320; $x++) {
+                $offset = ($y * 320 + $x) * 3;
+                for ($channel = 0; $channel < 3; $channel++) {
+                    $rows[$channel][] = (($pixels[$offset + $channel] / $maximumPixel) - $means[$channel]) / $deviations[$channel];
+                }
+            }
+            for ($channel = 0; $channel < 3; $channel++) {
+                $channels[$channel][] = $rows[$channel];
+            }
         }
 
-        try {
-            if (file_put_contents($path, $this->image->getImageBlob(), LOCK_EX) === false) {
-                throw new Exception('Failed to create image for focus detection');
-            }
-
-            $detections = (self::$focusDetector)($path, [$focus], threshold: 0.1, percentage: true, topK: PHP_INT_MAX);
-        } finally {
-            @unlink($path);
+        /** @var list<array{name: string}> $inputs */
+        $inputs = self::$saliencyModel->inputs();
+        /** @var list<array{name: string}> $outputs */
+        $outputs = self::$saliencyModel->outputs();
+        $inputName = $inputs[0]['name'];
+        $outputName = $outputs[0]['name'];
+        /** @var array<string, array{0: array{0: list<list<float|int>>}}> $prediction */
+        $prediction = self::$saliencyModel->predict([$inputName => [$channels]], [$outputName]);
+        $mask = $prediction[$outputName][0][0] ?? null;
+        if (! is_array($mask) || count($mask) !== 320) {
+            throw new Exception('U2NET returned an invalid saliency mask');
         }
 
-        if (! is_array($detections)) {
-            return [];
+        $minimum = INF;
+        $maximum = -INF;
+        foreach ($mask as $row) {
+            if (count($row) !== 320) {
+                throw new Exception('U2NET returned an invalid saliency mask');
+            }
+            foreach ($row as $value) {
+                $minimum = min($minimum, (float) $value);
+                $maximum = max($maximum, (float) $value);
+            }
         }
 
-        $regions = [];
-        foreach ($detections as $detection) {
-            if (! is_array($detection) || ! isset($detection['box']) || ! is_array($detection['box'])) {
-                continue;
-            }
-
-            $box = $detection['box'];
-            if (! isset($box['xmin'], $box['ymin'], $box['xmax'], $box['ymax'])) {
-                continue;
-            }
-            if (! is_numeric($box['xmin']) || ! is_numeric($box['ymin']) || ! is_numeric($box['xmax']) || ! is_numeric($box['ymax'])) {
-                continue;
-            }
-
-            $xmin = max(0.0, min(1.0, (float) $box['xmin']));
-            $ymin = max(0.0, min(1.0, (float) $box['ymin']));
-            $xmax = max(0.0, min(1.0, (float) $box['xmax']));
-            $ymax = max(0.0, min(1.0, (float) $box['ymax']));
-            $score = isset($detection['score']) && is_numeric($detection['score']) ? (float) $detection['score'] : 1.0;
-            if ($xmin >= $xmax || $ymin >= $ymax) {
-                continue;
-            }
-
-            $regions[] = compact('xmin', 'ymin', 'xmax', 'ymax', 'score');
+        $range = $maximum - $minimum;
+        if ($range < 1e-6) {
+            return array_fill(0, 320, array_fill(0, 320, 0.0));
         }
 
-        return $regions;
+        $normalized = [];
+        foreach ($mask as $row) {
+            $normalized[] = array_map(fn ($value): float => ((float) $value - $minimum) / $range, $row);
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param  list<list<float>>  $mask
+     * @return array{int, int}
+     */
+    protected function findSalientCrop(array $mask, int $width, int $height): array
+    {
+        $maskHeight = count($mask);
+        $maskWidth = count($mask[0] ?? []);
+        $width = min($maskWidth, $width);
+        $height = min($maskHeight, $height);
+        $centerX = ($maskWidth - $width) / 2;
+        $centerY = ($maskHeight - $height) / 2;
+
+        if ($maskWidth === 0 || $maskHeight === 0) {
+            return [0, 0];
+        }
+
+        $integral = [array_fill(0, $maskWidth + 1, 0.0)];
+        $minimum = INF;
+        $maximum = -INF;
+        foreach ($mask as $y => $row) {
+            $integral[$y + 1] = [0.0];
+            $rowSum = 0.0;
+            for ($x = 0; $x < $maskWidth; $x++) {
+                $value = (float) ($row[$x] ?? 0.0);
+                $minimum = min($minimum, $value);
+                $maximum = max($maximum, $value);
+                $rowSum += $value;
+                $integral[$y + 1][$x + 1] = $integral[$y][$x + 1] + $rowSum;
+            }
+        }
+
+        if ($maximum - $minimum < 1e-6) {
+            return [intval(round($centerX)), intval(round($centerY))];
+        }
+
+        $bestX = intval(round($centerX));
+        $bestY = intval(round($centerY));
+        $bestScore = -INF;
+        $bestDistance = INF;
+        for ($y = 0; $y <= $maskHeight - $height; $y++) {
+            for ($x = 0; $x <= $maskWidth - $width; $x++) {
+                $score = $integral[$y + $height][$x + $width]
+                    - $integral[$y][$x + $width]
+                    - $integral[$y + $height][$x]
+                    + $integral[$y][$x];
+                $distance = ($x - $centerX) ** 2 + ($y - $centerY) ** 2;
+                if ($score > $bestScore + 1e-9 || (abs($score - $bestScore) <= 1e-9 && $distance < $bestDistance)) {
+                    $bestScore = $score;
+                    $bestDistance = $distance;
+                    $bestX = $x;
+                    $bestY = $y;
+                }
+            }
+        }
+
+        return [$bestX, $bestY];
     }
 
     /**

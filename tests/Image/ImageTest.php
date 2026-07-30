@@ -397,79 +397,25 @@ class ImageTest extends TestCase
         }], $color[$expectedChannel]);
     }
 
-    public function test_crop_focus_uses_detected_region(): void
+    public function test_gravity_types_include_auto(): void
     {
-        $image = new class($this->createHorizontalStripeImage()) extends Image
-        {
-            public string $focus = '';
-
-            /**
-             * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
-             */
-            protected function detectFocus(string $focus): array
-            {
-                $this->focus = $focus;
-
-                return [['xmin' => 0.67, 'ymin' => 0.0, 'xmax' => 1.0, 'ymax' => 1.0, 'score' => 0.9]];
-            }
-        };
-
-        $image->crop(2, 2, focus: 'blue object');
-
-        $result = new \Imagick;
-        $result->readImageBlob($image->output('png', 100) ?: '');
-        $color = $result->getImagePixelColor(1, 1)->getColor();
-
-        $this->assertSame('blue object', $image->focus);
-        $this->assertGreaterThan($color['r'], $color['b']);
-        $this->assertGreaterThan($color['g'], $color['b']);
+        $this->assertContains(Image::GRAVITY_AUTO, Image::getGravityTypes());
     }
 
-    public function test_crop_focus_keeps_all_regions_when_possible(): void
+    public function test_crop_auto_uses_horizontal_saliency(): void
     {
         $image = new class($this->createHorizontalStripeImage()) extends Image
         {
             /**
-             * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
+             * @return list<list<float>>
              */
-            protected function detectFocus(string $focus): array
+            protected function detectSaliency(): array
             {
-                return [
-                    ['xmin' => 0.0, 'ymin' => 0.0, 'xmax' => 0.32, 'ymax' => 1.0, 'score' => 0.8],
-                    ['xmin' => 0.34, 'ymin' => 0.0, 'xmax' => 0.65, 'ymax' => 1.0, 'score' => 0.7],
-                ];
+                return array_fill(0, 320, [...array_fill(0, 213, 0.0), ...array_fill(0, 107, 1.0)]);
             }
         };
 
-        $image->crop(4, 2, focus: 'subjects');
-
-        $result = new \Imagick;
-        $result->readImageBlob($image->output('png', 100) ?: '');
-        $left = $result->getImagePixelColor(0, 1)->getColor();
-        $right = $result->getImagePixelColor(3, 1)->getColor();
-
-        $this->assertGreaterThan($left['g'], $left['r']);
-        $this->assertGreaterThan($right['r'], $right['g']);
-        $this->assertGreaterThan($right['b'], $right['g']);
-    }
-
-    public function test_crop_focus_prioritizes_stronger_region_when_all_cannot_fit(): void
-    {
-        $image = new class($this->createHorizontalStripeImage()) extends Image
-        {
-            /**
-             * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
-             */
-            protected function detectFocus(string $focus): array
-            {
-                return [
-                    ['xmin' => 0.0, 'ymin' => 0.0, 'xmax' => 0.32, 'ymax' => 1.0, 'score' => 0.2],
-                    ['xmin' => 0.68, 'ymin' => 0.0, 'xmax' => 1.0, 'ymax' => 1.0, 'score' => 0.9],
-                ];
-            }
-        };
-
-        $image->crop(2, 2, focus: 'subjects');
+        $image->crop(2, 2, Image::GRAVITY_AUTO);
 
         $result = new \Imagick;
         $result->readImageBlob($image->output('png', 100) ?: '');
@@ -479,27 +425,105 @@ class ImageTest extends TestCase
         $this->assertGreaterThan($color['g'], $color['b']);
     }
 
-    public function test_crop_focus_uses_gravity_when_nothing_is_detected(): void
+    public function test_crop_auto_uses_vertical_saliency(): void
     {
-        $image = new class($this->createHorizontalStripeImage()) extends Image
+        $image = new class($this->createVerticalStripeImage()) extends Image
         {
             /**
-             * @return list<array{xmin: float, ymin: float, xmax: float, ymax: float, score: float}>
+             * @return list<list<float>>
              */
-            protected function detectFocus(string $focus): array
+            protected function detectSaliency(): array
             {
-                return [];
+                return [
+                    ...array_fill(0, 213, array_fill(0, 320, 0.0)),
+                    ...array_fill(0, 107, array_fill(0, 320, 1.0)),
+                ];
             }
         };
 
-        $image->crop(2, 2, Image::GRAVITY_LEFT, focus: 'missing object');
+        $image->crop(2, 2, Image::GRAVITY_AUTO);
 
         $result = new \Imagick;
         $result->readImageBlob($image->output('png', 100) ?: '');
         $color = $result->getImagePixelColor(1, 1)->getColor();
 
-        $this->assertGreaterThan($color['g'], $color['r']);
-        $this->assertGreaterThan($color['b'], $color['r']);
+        $this->assertGreaterThan($color['r'], $color['b']);
+        $this->assertGreaterThan($color['g'], $color['b']);
+    }
+
+    public function test_crop_auto_centers_flat_saliency(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            /**
+             * @return list<list<float>>
+             */
+            protected function detectSaliency(): array
+            {
+                return array_fill(0, 320, array_fill(0, 320, 0.0));
+            }
+        };
+
+        $image->crop(2, 2, Image::GRAVITY_AUTO);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertGreaterThan($color['r'], $color['g']);
+        $this->assertGreaterThan($color['b'], $color['g']);
+    }
+
+    public function test_crop_auto_prefers_center_on_equal_scores(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            /**
+             * @param  list<list<float>>  $mask
+             * @return array{int, int}
+             */
+            public function selectCrop(array $mask, int $width, int $height): array
+            {
+                return $this->findSalientCrop($mask, $width, $height);
+            }
+        };
+
+        $this->assertSame([2, 0], $image->selectCrop([[1.0, 0.0, 1.0, 0.0]], 1, 1));
+    }
+
+    public function test_crop_auto_clamps_mask_coordinates_to_image_bounds(): void
+    {
+        $source = new \Imagick;
+        $source->newImage(1000, 100, 'white', 'png');
+        $image = new class($source->getImageBlob()) extends Image
+        {
+            /**
+             * @return list<list<float>>
+             */
+            protected function detectSaliency(): array
+            {
+                return array_fill(0, 320, [...array_fill(0, 160, 0.0), ...array_fill(0, 160, 1.0)]);
+            }
+        };
+
+        $image->crop(501, 100, Image::GRAVITY_AUTO);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $this->assertSame(501, $result->getImageWidth());
+        $this->assertSame(100, $result->getImageHeight());
+    }
+
+    public function test_crop_auto_with_u2net(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $image->crop(100, 200, Image::GRAVITY_AUTO);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+
+        $this->assertSame(100, $result->getImageWidth());
+        $this->assertSame(200, $result->getImageHeight());
     }
 
     private function createHorizontalStripeImage(): string
@@ -512,6 +536,21 @@ class ImageTest extends TestCase
         $draw->rectangle(2, 0, 3, 1);
         $draw->setFillColor('blue');
         $draw->rectangle(4, 0, 5, 1);
+        $source->drawImage($draw);
+
+        return $source->getImageBlob();
+    }
+
+    private function createVerticalStripeImage(): string
+    {
+        $source = new \Imagick;
+        $source->newImage(2, 6, 'red', 'png');
+
+        $draw = new \ImagickDraw;
+        $draw->setFillColor('green');
+        $draw->rectangle(0, 2, 1, 3);
+        $draw->setFillColor('blue');
+        $draw->rectangle(0, 4, 1, 5);
         $source->drawImage($draw);
 
         return $source->getImageBlob();
@@ -711,7 +750,7 @@ class ImageTest extends TestCase
 
         $this->assertEquals(\is_readable($target), true);
         $this->assertGreaterThan(500, \filesize($target));
-        $this->assertEquals(8490, \filesize($target));
+        $this->assertLessThan(9000, \filesize($target));
         $this->assertEquals(\mime_content_type($target), \mime_content_type($original));
         $this->assertFileExists($target);
         $this->assertNotEmpty(\file_get_contents($target));

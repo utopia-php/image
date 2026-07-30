@@ -27,10 +27,10 @@ $target = 'image_100x100.jpg';
 $image->crop(100, 100, Image::GRAVITY_TOP_LEFT);
 $image->save($target, 'jpg', 100);
 
-//crop around subjects described with natural language
+//automatically keep salient subjects in frame
 $image = new Image(\file_get_contents('image.jpg'));
-$image->crop(400, 300, focus: 'person holding a phone');
-$image->save('focused.jpg', 'jpg', 100);
+$image->crop(400, 300, Image::GRAVITY_AUTO);
+$image->save('automatic.jpg', 'jpg', 100);
 
 $image = new Image(\file_get_contents('image.jpg'));
 $target = 'image_border.jpg';
@@ -46,34 +46,34 @@ $image->save($target, 'png', 100);
 
 ```
 
-### Focus Cropping
+### Automatic Cropping
 
-The optional `focus` argument uses zero-shot object detection to position the crop around matching subjects:
-
-```php
-$image->crop(400, 300, focus: 'person');
-$image->crop(400, 300, focus: 'red car');
-```
-
-When multiple subjects match, the crop keeps all of them when possible and otherwise prioritizes the strongest detections. If nothing matches, the supplied gravity is used as a fallback:
+Use `Image::GRAVITY_AUTO` to position the crop around the most visually salient parts of an image:
 
 ```php
-$image->crop(400, 300, Image::GRAVITY_TOP, focus: 'red car');
+$image->crop(400, 300, Image::GRAVITY_AUTO);
 ```
 
-Focus cropping requires PHP FFI. The platform-specific inference runtime is installed through Composer, which requires allowing its reviewed installer plugin:
+Automatic cropping uses the bundled full U2NET saliency model. Empty or uniform saliency maps fall back to a centered crop. Applications do not need to download or configure a model.
+
+ONNX Runtime is installed per platform. Add its verified download hook to the root `composer.json` of the application using this library:
+
+```json
+{
+    "scripts": {
+        "post-install-cmd": "OnnxRuntime\\Vendor::check",
+        "post-update-cmd": "OnnxRuntime\\Vendor::check"
+    }
+}
+```
+
+Then run:
 
 ```bash
-composer config allow-plugins.codewithkyrian/platform-package-installer true
+composer install
 ```
 
-The prebuilt Linux inference runtime targets glibc. Alpine and other musl-based images require a musl-compatible ONNX Runtime build.
-
-The quantized model is cached on first use. Production deployments should download it during the build instead of during an image request:
-
-```bash
-./vendor/bin/transformers download Xenova/owlvit-base-patch32 zero-shot-object-detection
-```
+The provided Linux runtime targets glibc. Alpine and other musl-based systems require a compatible custom ONNX Runtime library.
 
 ## System Requirements
 
