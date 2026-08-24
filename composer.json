@@ -2,10 +2,18 @@
     "name": "utopia-php/image",
     "description": "A simple Image manipulation library",
     "type": "library",
-    "keywords": ["php","framework","upf","utopia","image"],
+    "keywords": [
+        "php",
+        "framework",
+        "upf",
+        "utopia",
+        "image"
+    ],
     "license": "MIT",
     "autoload": {
-        "psr-4": {"Utopia\\Image\\":"src/Image"}
+        "psr-4": {
+            "Utopia\\Image\\": "src/Image"
+        }
     },
     "scripts": {
         "lint": "./vendor/bin/pint --test",
