@@ -474,6 +474,49 @@ class ImageTest extends TestCase
         $this->assertGreaterThan($color['b'], $color['g']);
     }
 
+    public function test_detect_returns_persistable_saliency_result(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            protected function detectSaliency(): array
+            {
+                return array_fill(0, 320, array_fill(0, 320, 0.5));
+            }
+        };
+
+        $detection = $image->detect();
+
+        $this->assertSame(320, $detection['width']);
+        $this->assertSame(320, $detection['height']);
+        $this->assertCount(320, $detection['mask']);
+        $this->assertCount(320, $detection['mask'][0]);
+        $this->assertSame(0.5, $detection['mask'][0][0]);
+    }
+
+    public function test_crop_auto_uses_precomputed_detection(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            protected function detectSaliency(): array
+            {
+                throw new \RuntimeException('Detection should not run');
+            }
+        };
+
+        $image->crop(2, 2, Image::GRAVITY_AUTO, [
+            'width' => 320,
+            'height' => 320,
+            'mask' => array_fill(0, 320, [...array_fill(0, 213, 0.0), ...array_fill(0, 107, 1.0)]),
+        ]);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertGreaterThan($color['r'], $color['b']);
+        $this->assertGreaterThan($color['g'], $color['b']);
+    }
+
     public function test_crop_auto_prefers_center_on_equal_scores(): void
     {
         $image = new class($this->createHorizontalStripeImage()) extends Image

@@ -56,6 +56,20 @@ $image->crop(400, 300, Image::GRAVITY_AUTO);
 
 Automatic cropping uses the bundled full U2NET saliency model. Empty or uniform saliency maps fall back to a centered crop. Applications do not need to download or configure a model.
 
+Detection can run separately in a worker and be stored as JSON. The result contains the normalized saliency mask and its dimensions. Passing it to `crop()` skips model inference in the image worker:
+
+```php
+// Detection worker
+$image = new Image(\file_get_contents('image.jpg'));
+$detectionJson = json_encode($image->detect(), JSON_THROW_ON_ERROR);
+// Store $detectionJson in the database.
+
+// Image worker
+$image = new Image(\file_get_contents('image.jpg'));
+$detection = json_decode($detectionJson, true, flags: JSON_THROW_ON_ERROR);
+$image->crop(400, 300, Image::GRAVITY_AUTO, $detection);
+```
+
 ONNX Runtime is installed per platform. Add its verified download hook to the root `composer.json` of the application using this library:
 
 ```json

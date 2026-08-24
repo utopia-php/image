@@ -103,9 +103,11 @@ class Image
     }
 
     /**
+     * @param  null|array{width: int, height: int, mask: array<mixed>}  $detection
+     *
      * @throws \Throwable
      */
-    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
+    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER, ?array $detection = null): self
     {
         // if no changes to Gravity, Width or Height, don't process image
         if (($gravity === Image::GRAVITY_CENTER || $gravity === Image::GRAVITY_AUTO) &&
@@ -146,13 +148,14 @@ class Image
 
         $x = $y = 0;
         if ($gravity === self::GRAVITY_AUTO) {
+            $detection = $detection === null ? $this->detect() : $this->normalizeDetection($detection);
             [$maskX, $maskY] = $this->findSalientCrop(
-                $this->detectSaliency(),
-                max(1, intval(round(320 * $width / $resizeWidth))),
-                max(1, intval(round(320 * $height / $resizeHeight)))
+                $detection['mask'],
+                max(1, intval(round($detection['width'] * $width / $resizeWidth))),
+                max(1, intval(round($detection['height'] * $height / $resizeHeight)))
             );
-            $x = min($resizeWidth - $width, $maskX * $resizeWidth / 320);
-            $y = min($resizeHeight - $height, $maskY * $resizeHeight / 320);
+            $x = min($resizeWidth - $width, $maskX * $resizeWidth / $detection['width']);
+            $y = min($resizeHeight - $height, $maskY * $resizeHeight / $detection['height']);
         } else {
             switch ($gravity) {
                 case self::GRAVITY_TOP_LEFT:
@@ -221,6 +224,59 @@ class Image
         $this->width = $width;
 
         return $this;
+    }
+
+    /**
+     * Detects image saliency without modifying the image.
+     * The result can be persisted and later passed to crop() as $detection.
+     *
+     * @return array{width: int, height: int, mask: list<list<float>>}
+     */
+    public function detect(): array
+    {
+        return $this->normalizeDetection([
+            'width' => 320,
+            'height' => 320,
+            'mask' => $this->detectSaliency(),
+        ]);
+    }
+
+    /**
+     * @param  array{width: int, height: int, mask: array<mixed>}  $detection
+     * @return array{width: int, height: int, mask: list<list<float>>}
+     */
+    private function normalizeDetection(array $detection): array
+    {
+        $width = $detection['width'];
+        $height = $detection['height'];
+        $mask = $detection['mask'];
+
+        if ($width < 1 || $height < 1 || count($mask) !== $height) {
+            throw new Exception('Invalid saliency detection result');
+        }
+
+        $normalized = [];
+        foreach ($mask as $row) {
+            if (! is_array($row) || count($row) !== $width) {
+                throw new Exception('Invalid saliency detection result');
+            }
+
+            $normalizedRow = [];
+            foreach ($row as $value) {
+                if (! is_numeric($value)) {
+                    throw new Exception('Invalid saliency detection result');
+                }
+
+                $normalizedRow[] = max(0.0, min(1.0, (float) $value));
+            }
+            $normalized[] = $normalizedRow;
+        }
+
+        return [
+            'width' => $width,
+            'height' => $height,
+            'mask' => $normalized,
+        ];
     }
 
     /**
