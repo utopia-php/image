@@ -19,7 +19,7 @@
         "lint": "./vendor/bin/pint --test",
         "format": "./vendor/bin/pint",
         "check": "./vendor/bin/phpstan analyse --level max src tests --memory-limit=512M",
-        "test": "phpunit",
+        "test": "phpunit --testsuite unit",
         "post-install-cmd": "OnnxRuntime\\Vendor::check",
         "post-update-cmd": "OnnxRuntime\\Vendor::check"
     },

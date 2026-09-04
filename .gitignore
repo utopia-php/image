@@ -5,3 +5,4 @@
 .phpunit.result.cache
 .idea
 .DS_Store
+composer.lock

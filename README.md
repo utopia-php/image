@@ -95,6 +95,12 @@ The provided Linux runtime targets glibc. Alpine and other musl-based systems re
 
 Utopia Image requires PHP 8.1 or later with the Imagick, GD, and FFI extensions. We recommend using the latest PHP version whenever possible.
 
+## Testing
+
+```sh
+composer test
+```
+
 ## Copyright and license
 
 The MIT License (MIT) [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
