@@ -6,9 +6,12 @@ use Exception;
 use Imagick;
 use ImagickDraw;
 use ImagickPixel;
+use OnnxRuntime\Model;
 
 class Image
 {
+    public const GRAVITY_AUTO = 'auto';
+
     public const GRAVITY_CENTER = 'center';
 
     public const GRAVITY_TOP_LEFT = 'top-left';
@@ -41,12 +44,14 @@ class Image
 
     private int $rotation = 0;
 
+    private static ?Model $saliencyModel = null;
+
     /**
      * @throws \ImagickException
      */
     public function __construct(string $data)
     {
-        $this->image = new Imagick();
+        $this->image = new Imagick;
 
         $this->image->readImageBlob($data);
 
@@ -84,6 +89,7 @@ class Image
     public static function getGravityTypes(): array
     {
         return [
+            Image::GRAVITY_AUTO,
             Image::GRAVITY_CENTER,
             Image::GRAVITY_TOP_LEFT,
             Image::GRAVITY_TOP,
@@ -97,13 +103,16 @@ class Image
     }
 
     /**
+     * @param  null|array{width: int, height: int, mask: array<mixed>}  $detection
+     *
      * @throws \Throwable
      */
-    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER): self
+    public function crop(int $width, int $height, string $gravity = Image::GRAVITY_CENTER, ?array $detection = null): self
     {
         // if no changes to Gravity, Width or Height, don't process image
-        if ($gravity === Image::GRAVITY_CENTER
-            && (
+        if (($gravity === Image::GRAVITY_CENTER || $gravity === Image::GRAVITY_AUTO)
+            &&
+            (
                 ($width !== 0 && $height !== 0)
                 && ($width === $this->width && $height === $this->height)
             )) {
@@ -139,40 +148,51 @@ class Image
         }
 
         $x = $y = 0;
-        switch ($gravity) {
-            case self::GRAVITY_TOP_LEFT:
-                $x = 0;
-                $y = 0;
-                break;
-            case self::GRAVITY_TOP:
-                $x = ($resizeWidth / 2) - ($width / 2);
-                break;
-            case self::GRAVITY_TOP_RIGHT:
-                $x = $resizeWidth - $width;
-                break;
-            case self::GRAVITY_LEFT:
-                $y = ($resizeHeight / 2) - ($height / 2);
-                break;
-            case self::GRAVITY_RIGHT:
-                $x = $resizeWidth - $width;
-                $y = ($resizeHeight / 2) - ($height / 2);
-                break;
-            case self::GRAVITY_BOTTOM_LEFT:
-                $x = 0;
-                $y = $resizeHeight - $height;
-                break;
-            case self::GRAVITY_BOTTOM:
-                $x = ($resizeWidth / 2) - ($width / 2);
-                $y = $resizeHeight - $height;
-                break;
-            case self::GRAVITY_BOTTOM_RIGHT:
-                $x = $resizeWidth - $width;
-                $y = $resizeHeight - $height;
-                break;
-            default:
-                $x = ($resizeWidth / 2) - ($width / 2);
-                $y = ($resizeHeight / 2) - ($height / 2);
-                break;
+        if ($gravity === self::GRAVITY_AUTO) {
+            $detection = $detection === null ? $this->detect() : $this->normalizeDetection($detection);
+            [$maskX, $maskY] = $this->findSalientCrop(
+                $detection['mask'],
+                max(1, intval(round($detection['width'] * $width / $resizeWidth))),
+                max(1, intval(round($detection['height'] * $height / $resizeHeight)))
+            );
+            $x = min($resizeWidth - $width, $maskX * $resizeWidth / $detection['width']);
+            $y = min($resizeHeight - $height, $maskY * $resizeHeight / $detection['height']);
+        } else {
+            switch ($gravity) {
+                case self::GRAVITY_TOP_LEFT:
+                    $x = 0;
+                    $y = 0;
+                    break;
+                case self::GRAVITY_TOP:
+                    $x = ($resizeWidth / 2) - ($width / 2);
+                    break;
+                case self::GRAVITY_TOP_RIGHT:
+                    $x = $resizeWidth - $width;
+                    break;
+                case self::GRAVITY_LEFT:
+                    $y = ($resizeHeight / 2) - ($height / 2);
+                    break;
+                case self::GRAVITY_RIGHT:
+                    $x = $resizeWidth - $width;
+                    $y = ($resizeHeight / 2) - ($height / 2);
+                    break;
+                case self::GRAVITY_BOTTOM_LEFT:
+                    $x = 0;
+                    $y = $resizeHeight - $height;
+                    break;
+                case self::GRAVITY_BOTTOM:
+                    $x = ($resizeWidth / 2) - ($width / 2);
+                    $y = $resizeHeight - $height;
+                    break;
+                case self::GRAVITY_BOTTOM_RIGHT:
+                    $x = $resizeWidth - $width;
+                    $y = $resizeHeight - $height;
+                    break;
+                default:
+                    $x = ($resizeWidth / 2) - ($width / 2);
+                    $y = ($resizeHeight / 2) - ($height / 2);
+                    break;
+            }
         }
         $x = \intval($x);
         $y = \intval($y);
@@ -204,6 +224,190 @@ class Image
     }
 
     /**
+     * Detects image saliency without modifying the image.
+     * The result can be persisted and later passed to crop() as $detection.
+     *
+     * @return array{width: int, height: int, mask: list<list<float>>}
+     */
+    public function detect(): array
+    {
+        return $this->normalizeDetection([
+            'width' => 320,
+            'height' => 320,
+            'mask' => $this->detectSaliency(),
+        ]);
+    }
+
+    /**
+     * @param  array{width: int, height: int, mask: array<mixed>}  $detection
+     * @return array{width: int, height: int, mask: list<list<float>>}
+     */
+    private function normalizeDetection(array $detection): array
+    {
+        $width = $detection['width'];
+        $height = $detection['height'];
+        $mask = $detection['mask'];
+
+        if ($width < 1 || $height < 1 || count($mask) !== $height) {
+            throw new Exception('Invalid saliency detection result');
+        }
+
+        $normalized = [];
+        foreach ($mask as $row) {
+            if (! is_array($row) || count($row) !== $width) {
+                throw new Exception('Invalid saliency detection result');
+            }
+
+            $normalizedRow = [];
+            foreach ($row as $value) {
+                if (! is_numeric($value)) {
+                    throw new Exception('Invalid saliency detection result');
+                }
+
+                $normalizedRow[] = max(0.0, min(1.0, (float) $value));
+            }
+            $normalized[] = $normalizedRow;
+        }
+
+        return [
+            'width' => $width,
+            'height' => $height,
+            'mask' => $normalized,
+        ];
+    }
+
+    /**
+     * @return list<list<float>>
+     */
+    protected function detectSaliency(): array
+    {
+        self::$saliencyModel ??= new Model(dirname(__DIR__, 2).'/resources/models/u2net.onnx');
+
+        $image = clone $this->image;
+        $image->setFirstIterator();
+        $image = $image->getImage();
+        $image->setImageBackgroundColor('white');
+        $image->setImageAlphaChannel(Imagick::ALPHACHANNEL_REMOVE);
+        $image->transformImageColorspace(Imagick::COLORSPACE_RGB);
+        $image->resizeImage(320, 320, Imagick::FILTER_LANCZOS, 1, false);
+
+        /** @var non-empty-list<int> $pixels */
+        $pixels = $image->exportImagePixels(0, 0, 320, 320, 'RGB', Imagick::PIXEL_CHAR);
+        $maximumPixel = max(1, max($pixels));
+        $channels = [[], [], []];
+        $means = [0.485, 0.456, 0.406];
+        $deviations = [0.229, 0.224, 0.225];
+        for ($y = 0; $y < 320; $y++) {
+            $rows = [[], [], []];
+            for ($x = 0; $x < 320; $x++) {
+                $offset = ($y * 320 + $x) * 3;
+                for ($channel = 0; $channel < 3; $channel++) {
+                    $rows[$channel][] = (($pixels[$offset + $channel] / $maximumPixel) - $means[$channel]) / $deviations[$channel];
+                }
+            }
+            for ($channel = 0; $channel < 3; $channel++) {
+                $channels[$channel][] = $rows[$channel];
+            }
+        }
+
+        /** @var list<array{name: string}> $inputs */
+        $inputs = self::$saliencyModel->inputs();
+        /** @var list<array{name: string}> $outputs */
+        $outputs = self::$saliencyModel->outputs();
+        $inputName = $inputs[0]['name'];
+        $outputName = $outputs[0]['name'];
+        /** @var array<string, array{0: array{0: list<list<float|int>>}}> $prediction */
+        $prediction = self::$saliencyModel->predict([$inputName => [$channels]], [$outputName]);
+        $mask = $prediction[$outputName][0][0] ?? null;
+        if (! is_array($mask) || count($mask) !== 320) {
+            throw new Exception('U2NET returned an invalid saliency mask');
+        }
+
+        $minimum = INF;
+        $maximum = -INF;
+        foreach ($mask as $row) {
+            if (count($row) !== 320) {
+                throw new Exception('U2NET returned an invalid saliency mask');
+            }
+            foreach ($row as $value) {
+                $minimum = min($minimum, (float) $value);
+                $maximum = max($maximum, (float) $value);
+            }
+        }
+
+        $range = $maximum - $minimum;
+        if ($range < 1e-6) {
+            return array_fill(0, 320, array_fill(0, 320, 0.0));
+        }
+
+        $normalized = [];
+        foreach ($mask as $row) {
+            $normalized[] = array_map(fn ($value): float => ((float) $value - $minimum) / $range, $row);
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param  list<list<float>>  $mask
+     * @return array{int, int}
+     */
+    protected function findSalientCrop(array $mask, int $width, int $height): array
+    {
+        $maskHeight = count($mask);
+        $maskWidth = count($mask[0] ?? []);
+        $width = min($maskWidth, $width);
+        $height = min($maskHeight, $height);
+        $centerX = ($maskWidth - $width) / 2;
+        $centerY = ($maskHeight - $height) / 2;
+
+        if ($maskWidth === 0 || $maskHeight === 0) {
+            return [0, 0];
+        }
+
+        $integral = [array_fill(0, $maskWidth + 1, 0.0)];
+        $minimum = INF;
+        $maximum = -INF;
+        foreach ($mask as $y => $row) {
+            $integral[$y + 1] = [0.0];
+            $rowSum = 0.0;
+            for ($x = 0; $x < $maskWidth; $x++) {
+                $value = (float) ($row[$x] ?? 0.0);
+                $minimum = min($minimum, $value);
+                $maximum = max($maximum, $value);
+                $rowSum += $value;
+                $integral[$y + 1][$x + 1] = $integral[$y][$x + 1] + $rowSum;
+            }
+        }
+
+        if ($maximum - $minimum < 1e-6) {
+            return [intval(round($centerX)), intval(round($centerY))];
+        }
+
+        $bestX = intval(round($centerX));
+        $bestY = intval(round($centerY));
+        $bestScore = -INF;
+        $bestDistance = INF;
+        for ($y = 0; $y <= $maskHeight - $height; $y++) {
+            for ($x = 0; $x <= $maskWidth - $width; $x++) {
+                $score = $integral[$y + $height][$x + $width]
+                    - $integral[$y][$x + $width]
+                    - $integral[$y + $height][$x]
+                    + $integral[$y][$x];
+                $distance = ($x - $centerX) ** 2 + ($y - $centerY) ** 2;
+                if ($score > $bestScore + 1e-9 || (abs($score - $bestScore) <= 1e-9 && $distance < $bestDistance)) {
+                    $bestScore = $score;
+                    $bestDistance = $distance;
+                    $bestX = $x;
+                    $bestY = $y;
+                }
+            }
+        }
+
+        return [$bestX, $bestY];
+    }
+
+    /**
      * @param  int  $borderWidth  The size of the border in pixels
      * @param  string  $borderColor  The color of the border in hex format
      *
@@ -232,13 +436,13 @@ class Image
      */
     public function setBorderRadius(int $cornerRadius): self
     {
-        $mask = new Imagick();
+        $mask = new Imagick;
         $mask->newImage($this->width, $this->height, new ImagickPixel('transparent'), 'png');
 
         $rectwidth = ($this->borderWidth > 0 ? ($this->width - ($this->borderWidth + 1)) : $this->width - 1);
         $rectheight = ($this->borderWidth > 0 ? ($this->height - ($this->borderWidth + 1)) : $this->height - 1);
 
-        $shape = new ImagickDraw();
+        $shape = new ImagickDraw;
         $shape->setFillColor(new ImagickPixel('black'));
         $shape->roundRectangle($this->borderWidth, $this->borderWidth, $rectwidth, $rectheight, $cornerRadius, $cornerRadius);
 
@@ -246,13 +450,13 @@ class Image
         $this->image->compositeImage($mask, Imagick::COMPOSITE_DSTIN, 0, 0);
 
         if ($this->borderWidth > 0) {
-            $bc = new ImagickPixel();
+            $bc = new ImagickPixel;
             $bc->setColor($this->borderColor);
 
-            $strokeCanvas = new Imagick();
+            $strokeCanvas = new Imagick;
             $strokeCanvas->newImage($this->width, $this->height, new ImagickPixel('transparent'), 'png');
 
-            $shape2 = new ImagickDraw();
+            $shape2 = new ImagickDraw;
             $shape2->setFillColor(new ImagickPixel('transparent'));
             $shape2->setStrokeWidth($this->borderWidth);
             $shape2->setStrokeColor($bc);
@@ -337,8 +541,8 @@ class Image
     public function save(?string $path = null, string $type = '', int $quality = 75): ?string
     {
         // Create directory with write permissions
-        if ($path !== null && !file_exists(\dirname($path)) && ! @mkdir(\dirname($path), 0755, true)) {
-            throw new Exception('Can\'t create directory ' . \dirname($path));
+        if ($path !== null && ! file_exists(\dirname($path)) && ! @mkdir(\dirname($path), 0755, true)) {
+            throw new Exception('Can\'t create directory '.\dirname($path));
         }
 
         // Apply original metadata rotation

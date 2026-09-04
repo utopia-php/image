@@ -20,7 +20,7 @@ final class ImageTest extends TestCase
             self::markTestSkipped("The {$format} encoder is not available.");
         }
 
-        $probe = new \Imagick();
+        $probe = new \Imagick;
         try {
             $probe->newImage(1, 1, 'white');
             $probe->setImageFormat($format);
@@ -36,22 +36,22 @@ final class ImageTest extends TestCase
 
     private function jpegWithExifOrientation(int $orientation): string
     {
-        $source = new \Imagick();
+        $source = new \Imagick;
         $source->newImage(20, 10, 'red', 'jpg');
         $jpeg = $source->getImageBlob();
 
         $exif = "Exif\0\0II*\0\x08\0\0\0\x01\0\x12\x01\x03\0\x01\0\0\0"
-            . pack('v', $orientation)
-            . "\0\0\0\0\0\0";
-        $segment = "\xff\xe1" . pack('n', \strlen($exif) + 2) . $exif;
+            .pack('v', $orientation)
+            ."\0\0\0\0\0\0";
+        $segment = "\xff\xe1".pack('n', \strlen($exif) + 2).$exif;
 
-        return substr($jpeg, 0, 2) . $segment . substr($jpeg, 2);
+        return substr($jpeg, 0, 2).$segment.substr($jpeg, 2);
     }
 
-    public function testJpeg(): void
+    public function test_jpeg(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.jpg';
 
         $image->crop(100, 100);
 
@@ -69,10 +69,10 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testPng(): void
+    public function test_png(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100.png';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.png';
 
         $image->crop(100, 100);
 
@@ -90,10 +90,10 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100(): void
+    public function test_crop100x100(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.jpg';
 
         $image->crop(100, 100);
 
@@ -111,11 +111,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravityNw(): void
+    public function test_crop_gravity_nw(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/NW.jpg';
-        $original = __DIR__ . '/../resources/resize/NW.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/NW.jpg';
+        $original = __DIR__.'/../resources/resize/NW.jpg';
 
         $image->crop(50, 200, Image::GRAVITY_TOP_LEFT);
 
@@ -138,11 +138,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravityN(): void
+    public function test_crop_gravity_n(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-3.gif') ?: '');
-        $target = __DIR__ . '/N.gif';
-        $original = __DIR__ . '/../resources/resize/N.gif';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif') ?: '');
+        $target = __DIR__.'/N.gif';
+        $original = __DIR__.'/../resources/resize/N.gif';
 
         $image->crop(100, 50, Image::GRAVITY_TOP);
 
@@ -165,11 +165,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravityNe(): void
+    public function test_crop_gravity_ne(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/NE.jpg';
-        $original = __DIR__ . '/../resources/resize/NE.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/NE.jpg';
+        $original = __DIR__.'/../resources/resize/NE.jpg';
 
         $image->crop(50, 200, Image::GRAVITY_TOP_RIGHT);
 
@@ -192,11 +192,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravitySw(): void
+    public function test_crop_gravity_sw(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/SW.jpg';
-        $original = __DIR__ . '/../resources/resize/SW.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/SW.jpg';
+        $original = __DIR__.'/../resources/resize/SW.jpg';
 
         $image->crop(50, 200, Image::GRAVITY_BOTTOM_LEFT);
 
@@ -219,11 +219,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravityS(): void
+    public function test_crop_gravity_s(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-3.gif') ?: '');
-        $target = __DIR__ . '/S.gif';
-        $original = __DIR__ . '/../resources/resize/S.gif';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif') ?: '');
+        $target = __DIR__.'/S.gif';
+        $original = __DIR__.'/../resources/resize/S.gif';
 
         $image->crop(100, 50, Image::GRAVITY_BOTTOM);
 
@@ -246,11 +246,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravitySe(): void
+    public function test_crop_gravity_se(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/SE.jpg';
-        $original = __DIR__ . '/../resources/resize/SE.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/SE.jpg';
+        $original = __DIR__.'/../resources/resize/SE.jpg';
 
         $image->crop(50, 200, Image::GRAVITY_BOTTOM_RIGHT);
 
@@ -273,11 +273,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravityC(): void
+    public function test_crop_gravity_c(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/C.jpg';
-        $original = __DIR__ . '/../resources/resize/C.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/C.jpg';
+        $original = __DIR__.'/../resources/resize/C.jpg';
 
         $image->crop(150, 200, Image::GRAVITY_CENTER);
 
@@ -300,11 +300,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravityW(): void
+    public function test_crop_gravity_w(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-3.gif') ?: '');
-        $target = __DIR__ . '/W.gif';
-        $original = __DIR__ . '/../resources/resize/W.gif';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif') ?: '');
+        $target = __DIR__.'/W.gif';
+        $original = __DIR__.'/../resources/resize/W.gif';
 
         $image->crop(50, 100, Image::GRAVITY_LEFT);
 
@@ -327,11 +327,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravityE(): void
+    public function test_crop_gravity_e(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/E.jpg';
-        $original = __DIR__ . '/../resources/resize/E.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/E.jpg';
+        $original = __DIR__.'/../resources/resize/E.jpg';
 
         $image->crop(50, 200, Image::GRAVITY_RIGHT);
 
@@ -354,12 +354,12 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCropGravityPreservesAspectRatio(): void
+    public function test_crop_gravity_preserves_aspect_ratio(): void
     {
-        $source = new \Imagick();
+        $source = new \Imagick;
         $source->newImage(2, 4, 'red', 'png');
 
-        $draw = new \ImagickDraw();
+        $draw = new \ImagickDraw;
         $draw->setFillColor('blue');
         $draw->rectangle(0, 2, 1, 3);
         $source->drawImage($draw);
@@ -367,7 +367,7 @@ final class ImageTest extends TestCase
         $image = new Image($source->getImageBlob());
         $image->crop(4, 2, Image::GRAVITY_TOP);
 
-        $result = new \Imagick();
+        $result = new \Imagick;
         $result->readImageBlob($image->output('png', 100) ?: '');
         $color = $result->getImagePixelColor(2, 1)->getColor();
 
@@ -400,12 +400,12 @@ final class ImageTest extends TestCase
     }
 
     #[DataProvider('gravityProvider')]
-    public function testCropGravityPositions(string $gravity, bool $horizontal, string $expectedChannel): void
+    public function test_crop_gravity_positions(string $gravity, bool $horizontal, string $expectedChannel): void
     {
-        $source = new \Imagick();
+        $source = new \Imagick;
         $source->newImage($horizontal ? 6 : 2, $horizontal ? 2 : 6, 'red', 'png');
 
-        $draw = new \ImagickDraw();
+        $draw = new \ImagickDraw;
         $draw->setFillColor('green');
         $draw->rectangle($horizontal ? 2 : 0, $horizontal ? 0 : 2, $horizontal ? 3 : 1, $horizontal ? 1 : 3);
         $draw->setFillColor('blue');
@@ -415,7 +415,7 @@ final class ImageTest extends TestCase
         $image = new Image($source->getImageBlob());
         $image->crop(2, 2, $gravity);
 
-        $result = new \Imagick();
+        $result = new \Imagick;
         $result->readImageBlob($image->output('png', 100) ?: '');
         $color = $result->getImagePixelColor(1, 1)->getColor();
 
@@ -431,10 +431,212 @@ final class ImageTest extends TestCase
         }], $color[$expectedChannel]);
     }
 
-    public function testCrop100x400(): void
+    public function test_gravity_types_include_auto(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x400.jpg';
+        $this->assertContains(Image::GRAVITY_AUTO, Image::getGravityTypes());
+    }
+
+    public function test_crop_auto_uses_horizontal_saliency(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            /**
+             * @return list<list<float>>
+             */
+            protected function detectSaliency(): array
+            {
+                return array_fill(0, 320, [...array_fill(0, 213, 0.0), ...array_fill(0, 107, 1.0)]);
+            }
+        };
+
+        $image->crop(2, 2, Image::GRAVITY_AUTO);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertGreaterThan($color['r'], $color['b']);
+        $this->assertGreaterThan($color['g'], $color['b']);
+    }
+
+    public function test_crop_auto_uses_vertical_saliency(): void
+    {
+        $image = new class($this->createVerticalStripeImage()) extends Image
+        {
+            /**
+             * @return list<list<float>>
+             */
+            protected function detectSaliency(): array
+            {
+                return [
+                    ...array_fill(0, 213, array_fill(0, 320, 0.0)),
+                    ...array_fill(0, 107, array_fill(0, 320, 1.0)),
+                ];
+            }
+        };
+
+        $image->crop(2, 2, Image::GRAVITY_AUTO);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertGreaterThan($color['r'], $color['b']);
+        $this->assertGreaterThan($color['g'], $color['b']);
+    }
+
+    public function test_crop_auto_centers_flat_saliency(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            /**
+             * @return list<list<float>>
+             */
+            protected function detectSaliency(): array
+            {
+                return array_fill(0, 320, array_fill(0, 320, 0.0));
+            }
+        };
+
+        $image->crop(2, 2, Image::GRAVITY_AUTO);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertGreaterThan($color['r'], $color['g']);
+        $this->assertGreaterThan($color['b'], $color['g']);
+    }
+
+    public function test_detect_returns_persistable_saliency_result(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            protected function detectSaliency(): array
+            {
+                return array_fill(0, 320, array_fill(0, 320, 0.5));
+            }
+        };
+
+        $detection = $image->detect();
+
+        $this->assertSame(320, $detection['width']);
+        $this->assertSame(320, $detection['height']);
+        $this->assertCount(320, $detection['mask']);
+        $this->assertCount(320, $detection['mask'][0]);
+        $this->assertSame(0.5, $detection['mask'][0][0]);
+    }
+
+    public function test_crop_auto_uses_precomputed_detection(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            protected function detectSaliency(): array
+            {
+                throw new \RuntimeException('Detection should not run');
+            }
+        };
+
+        $image->crop(2, 2, Image::GRAVITY_AUTO, [
+            'width' => 320,
+            'height' => 320,
+            'mask' => array_fill(0, 320, [...array_fill(0, 213, 0.0), ...array_fill(0, 107, 1.0)]),
+        ]);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertGreaterThan($color['r'], $color['b']);
+        $this->assertGreaterThan($color['g'], $color['b']);
+    }
+
+    public function test_crop_auto_prefers_center_on_equal_scores(): void
+    {
+        $image = new class($this->createHorizontalStripeImage()) extends Image
+        {
+            /**
+             * @param  list<list<float>>  $mask
+             * @return array{int, int}
+             */
+            public function selectCrop(array $mask, int $width, int $height): array
+            {
+                return $this->findSalientCrop($mask, $width, $height);
+            }
+        };
+
+        $this->assertSame([2, 0], $image->selectCrop([[1.0, 0.0, 1.0, 0.0]], 1, 1));
+    }
+
+    public function test_crop_auto_clamps_mask_coordinates_to_image_bounds(): void
+    {
+        $source = new \Imagick;
+        $source->newImage(1000, 100, 'white', 'png');
+        $image = new class($source->getImageBlob()) extends Image
+        {
+            /**
+             * @return list<list<float>>
+             */
+            protected function detectSaliency(): array
+            {
+                return array_fill(0, 320, [...array_fill(0, 160, 0.0), ...array_fill(0, 160, 1.0)]);
+            }
+        };
+
+        $image->crop(501, 100, Image::GRAVITY_AUTO);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $this->assertSame(501, $result->getImageWidth());
+        $this->assertSame(100, $result->getImageHeight());
+    }
+
+    public function test_crop_auto_with_u2net(): void
+    {
+        $image = new Image(\file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $image->crop(100, 200, Image::GRAVITY_AUTO);
+
+        $result = new \Imagick;
+        $result->readImageBlob($image->output('png', 100) ?: '');
+
+        $this->assertSame(100, $result->getImageWidth());
+        $this->assertSame(200, $result->getImageHeight());
+    }
+
+    private function createHorizontalStripeImage(): string
+    {
+        $source = new \Imagick;
+        $source->newImage(6, 2, 'red', 'png');
+
+        $draw = new \ImagickDraw;
+        $draw->setFillColor('green');
+        $draw->rectangle(2, 0, 3, 1);
+        $draw->setFillColor('blue');
+        $draw->rectangle(4, 0, 5, 1);
+        $source->drawImage($draw);
+
+        return $source->getImageBlob();
+    }
+
+    private function createVerticalStripeImage(): string
+    {
+        $source = new \Imagick;
+        $source->newImage(2, 6, 'red', 'png');
+
+        $draw = new \ImagickDraw;
+        $draw->setFillColor('green');
+        $draw->rectangle(0, 2, 1, 3);
+        $draw->setFillColor('blue');
+        $draw->rectangle(0, 4, 1, 5);
+        $source->drawImage($draw);
+
+        return $source->getImageBlob();
+    }
+
+    public function test_crop100x400(): void
+    {
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x400.jpg';
 
         $image->crop(100, 400);
 
@@ -452,10 +654,10 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop400x100(): void
+    public function test_crop400x100(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/400x100.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/400x100.jpg';
 
         $image->crop(400, 100);
 
@@ -473,10 +675,10 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100Webp(): void
+    public function test_crop100x100_webp(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100.webp';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.webp';
 
         $image->crop(100, 100);
 
@@ -495,11 +697,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100WebpQuality30(): void
+    public function test_crop100x100_webp_quality30(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100-q30.webp';
-        $original = __DIR__ . '/../resources/resize/100x100-q30.webp';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100-q30.webp';
+        $original = __DIR__.'/../resources/resize/100x100-q30.webp';
 
         $image->crop(100, 100);
 
@@ -525,9 +727,9 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testWebpBlobOutput(): void
+    public function test_webp_blob_output(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
 
         $image->crop(100, 100);
 
@@ -538,14 +740,14 @@ final class ImageTest extends TestCase
         $this->assertSame('RIFF', substr($blob, 0, 4));
         $this->assertSame('WEBP', substr($blob, 8, 4));
 
-        $probe = new \Imagick();
+        $probe = new \Imagick;
         $probe->readImageBlob($blob);
         $this->assertSame(100, $probe->getImageWidth());
         $this->assertSame(100, $probe->getImageHeight());
         $this->assertContains($probe->getImageFormat(), ['PAM', 'WEBP']);
     }
 
-    public function testRepeatedOutputAppliesExifRotationOnce(): void
+    public function test_repeated_output_applies_exif_rotation_once(): void
     {
         $image = new Image($this->jpegWithExifOrientation(6));
 
@@ -554,9 +756,9 @@ final class ImageTest extends TestCase
         $this->assertIsString($firstBlob);
         $this->assertIsString($secondBlob);
 
-        $first = new \Imagick();
+        $first = new \Imagick;
         $first->readImageBlob($firstBlob);
-        $second = new \Imagick();
+        $second = new \Imagick;
         $second->readImageBlob($secondBlob);
 
         $this->assertSame(10, $first->getImageWidth());
@@ -565,10 +767,10 @@ final class ImageTest extends TestCase
         $this->assertSame($first->getImageHeight(), $second->getImageHeight());
     }
 
-    public function testSavePreservesImageForSubsequentExports(): void
+    public function test_save_preserves_image_for_subsequent_exports(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/reusable.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/reusable.jpg';
 
         try {
             $image->save($target, 'jpg', 75);
@@ -577,7 +779,7 @@ final class ImageTest extends TestCase
             $this->assertIsString($blob);
             $this->assertNotEmpty($blob);
 
-            $probe = new \Imagick();
+            $probe = new \Imagick;
             $probe->readImageBlob($blob);
             $this->assertSame('PNG', $probe->getImageFormat());
         } finally {
@@ -587,17 +789,17 @@ final class ImageTest extends TestCase
         }
     }
 
-    public function testSaveWritesFilenameZero(): void
+    public function test_save_writes_filename_zero(): void
     {
         $cwd = getcwd();
         $this->assertIsString($cwd);
-        $directory = sys_get_temp_dir() . '/utopia-image-' . bin2hex(random_bytes(8));
+        $directory = sys_get_temp_dir().'/utopia-image-'.bin2hex(random_bytes(8));
         $this->assertTrue(mkdir($directory));
-        $target = $directory . '/0';
+        $target = $directory.'/0';
 
         try {
             $this->assertTrue(chdir($directory));
-            $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
+            $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
             $this->assertNull($image->save('0', 'jpg', 75));
             $this->assertFileExists($target);
             $this->assertNotEmpty(file_get_contents($target));
@@ -610,10 +812,10 @@ final class ImageTest extends TestCase
         }
     }
 
-    public function testWebpFromWebpInput(): void
+    public function test_webp_from_webp_input(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/resize/100x100.webp') ?: '');
-        $target = __DIR__ . '/roundtrip.webp';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/resize/100x100.webp') ?: '');
+        $target = __DIR__.'/roundtrip.webp';
 
         $image->crop(50, 50);
 
@@ -630,12 +832,12 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100Avif(): void
+    public function test_crop100x100_avif(): void
     {
         $this->requireEncoder('AVIF');
 
-        $image = new Image(file_get_contents(filename: __DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100.avif';
+        $image = new Image(file_get_contents(filename: __DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.avif';
 
         $image->crop(100, 100);
 
@@ -657,12 +859,12 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100AvifQuality30(): void
+    public function test_crop100x100_avif_quality30(): void
     {
         $this->requireEncoder('AVIF');
 
-        $image = new Image(file_get_contents(filename: __DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100-q30.avif';
+        $image = new Image(file_get_contents(filename: __DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100-q30.avif';
 
         $image->crop(100, 100);
 
@@ -681,13 +883,13 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100Heic(): void
+    public function test_crop100x100_heic(): void
     {
         $this->requireEncoder('HEIC');
 
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100.heic';
-        $original = __DIR__ . '/../resources/resize/100x100.heic';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.heic';
+        $original = __DIR__.'/../resources/resize/100x100.heic';
 
         $image->crop(100, 100);
 
@@ -713,13 +915,13 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100HeicQuality30(): void
+    public function test_crop100x100_heic_quality30(): void
     {
         $this->requireEncoder('HEIC');
 
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100-q30.heic';
-        $original = __DIR__ . '/../resources/resize/100x100.heic';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100-q30.heic';
+        $original = __DIR__.'/../resources/resize/100x100.heic';
 
         $image->crop(100, 100);
 
@@ -745,11 +947,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100Png(): void
+    public function test_crop100x100_png(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100.png';
-        $original = __DIR__ . '/../resources/resize/100x100.png';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100.png';
+        $original = __DIR__.'/../resources/resize/100x100.png';
 
         $image->crop(100, 100);
 
@@ -770,11 +972,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100PngQuality30(): void
+    public function test_crop100x100_png_quality30(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100-q30.jpg';
-        $original = __DIR__ . '/../resources/resize/100x100-q30.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100-q30.jpg';
+        $original = __DIR__.'/../resources/resize/100x100-q30.jpg';
 
         $image->crop(100, 100);
 
@@ -795,11 +997,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100x100Gif(): void
+    public function test_crop100x100_gif(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-3.gif') ?: '');
-        $target = __DIR__ . '/100x100.gif';
-        $original = __DIR__ . '/../resources/resize/100x100.gif';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-3.gif') ?: '');
+        $target = __DIR__.'/100x100.gif';
+        $original = __DIR__.'/../resources/resize/100x100.gif';
 
         $image->crop(100, 100);
 
@@ -819,11 +1021,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testBorder5Red(): void
+    public function test_border5_red(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/border_5_red.jpg';
-        $original = __DIR__ . '/../resources/resize/border_5_red.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/border_5_red.jpg';
+        $original = __DIR__.'/../resources/resize/border_5_red.jpg';
 
         $image->setBorder(5, '#ff0000');
 
@@ -839,11 +1041,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testRotate45(): void
+    public function test_rotate45(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/rotate_45.jpg';
-        $original = __DIR__ . '/../resources/resize/rotate_45.jpg';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/rotate_45.jpg';
+        $original = __DIR__.'/../resources/resize/rotate_45.jpg';
 
         $image->setRotation(45);
 
@@ -861,11 +1063,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testOpacity02(): void
+    public function test_opacity02(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/opacity_0.2.png';
-        $original = __DIR__ . '/../resources/resize/opacity_0.2.png';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/opacity_0.2.png';
+        $original = __DIR__.'/../resources/resize/opacity_0.2.png';
 
         $image->setOpacity(0.2);
 
@@ -881,11 +1083,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testBorderRadius500(): void
+    public function test_border_radius500(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/border_radius_500.png';
-        $original = __DIR__ . '/../resources/resize/border_radius_500.png';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/border_radius_500.png';
+        $original = __DIR__.'/../resources/resize/border_radius_500.png';
 
         $image->setBorderRadius(500);
 
@@ -901,11 +1103,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100Op05(): void
+    public function test_crop100_op05(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100_OP_0.5.png';
-        $original = __DIR__ . '/../resources/resize/100x100_OP_0.5.png';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100_OP_0.5.png';
+        $original = __DIR__.'/../resources/resize/100x100_OP_0.5.png';
 
         $image->crop(100, 100);
         $image->setOpacity(0.5);
@@ -924,11 +1126,11 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testCrop100BR50(): void
+    public function test_crop100_b_r50(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
-        $target = __DIR__ . '/100x100_BR_50.png';
-        $original = __DIR__ . '/../resources/resize/100x100_BR_50.png';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/kitten-1.jpg') ?: '');
+        $target = __DIR__.'/100x100_BR_50.png';
+        $original = __DIR__.'/../resources/resize/100x100_BR_50.png';
 
         $image->crop(100, 100);
         $image->setOpacity(0.5);
@@ -945,10 +1147,10 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
-    public function testGifSmallLastFrame(): void
+    public function test_gif_small_last_frame(): void
     {
-        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/last-frame-1px.gif') ?: '');
-        $target = __DIR__ . '/last-frame-1px-output.gif';
+        $image = new Image(file_get_contents(__DIR__.'/../resources/disk-a/last-frame-1px.gif') ?: '');
+        $target = __DIR__.'/last-frame-1px-output.gif';
 
         $image->crop(0, 0);
 
@@ -970,11 +1172,11 @@ final class ImageTest extends TestCase
      * Animated WebP stores delta/partial frames. Cropping without coalesce
      * scales those fragments independently and produces ghosting artifacts.
      */
-    public function testCropAnimatedWebpPreservesFrames(): void
+    public function test_crop_animated_webp_preserves_frames(): void
     {
-        $source = __DIR__ . '/../resources/disk-a/anim-delta.webp';
+        $source = __DIR__.'/../resources/disk-a/anim-delta.webp';
         $image = new Image(file_get_contents($source) ?: '');
-        $target = __DIR__ . '/anim-delta-32x32.webp';
+        $target = __DIR__.'/anim-delta-32x32.webp';
 
         $image->crop(32, 32);
         $image->save($target, 'webp', 100);
@@ -1014,11 +1216,11 @@ final class ImageTest extends TestCase
      * Consecutive identical frames are hold/pause frames. Cropping must keep
      * total playback delay — deconstructImages() + WebP encode can zero it out.
      */
-    public function testCropAnimatedWebpPreservesHoldFrames(): void
+    public function test_crop_animated_webp_preserves_hold_frames(): void
     {
-        $sequence = new \Imagick();
+        $sequence = new \Imagick;
         foreach (['#ff0000', '#ff0000', '#0000ff'] as $color) {
-            $frame = new \Imagick();
+            $frame = new \Imagick;
             $frame->newImage(40, 40, new \ImagickPixel($color));
             $frame->setImageDelay(40);
             $frame->setImageDispose(\Imagick::DISPOSE_NONE);
@@ -1035,7 +1237,7 @@ final class ImageTest extends TestCase
         $this->assertNotFalse($outputBlob);
         $this->assertNotNull($outputBlob);
 
-        $output = new \Imagick();
+        $output = new \Imagick;
         $output->readImageBlob($outputBlob);
 
         $totalDelay = 0;
