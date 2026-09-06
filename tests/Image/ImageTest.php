@@ -111,6 +111,44 @@ final class ImageTest extends TestCase
         unlink($target);
     }
 
+    public function testCropFocalUsesNormalizedCoordinates(): void
+    {
+        $source = new \Imagick();
+        $source->newImage(6, 2, 'red', 'png');
+        $draw = new \ImagickDraw();
+        $draw->setFillColor('green');
+        $draw->rectangle(2, 0, 3, 1);
+        $draw->setFillColor('blue');
+        $draw->rectangle(4, 0, 5, 1);
+        $source->drawImage($draw);
+
+        $image = new Image($source->getImageBlob());
+        $image->crop(2, 2, x: 0.75, y: 0.5);
+
+        $result = new \Imagick();
+        $result->readImageBlob($image->output('png', 100) ?: '');
+        $color = $result->getImagePixelColor(1, 1)->getColor();
+
+        $this->assertGreaterThan($color['r'], $color['b']);
+        $this->assertGreaterThan($color['g'], $color['b']);
+    }
+
+    public function testCropFocalRejectsCoordinatesOutsideTheImage(): void
+    {
+        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $image->crop(100, 100, x: 1.1, y: 0.5);
+    }
+
+    public function testCropFocalRequiresBothCoordinates(): void
+    {
+        $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $image->crop(100, 100, x: 0.5);
+    }
+
     public function testCropGravityNw(): void
     {
         $image = new Image(file_get_contents(__DIR__ . '/../resources/disk-a/kitten-1.jpg') ?: '');
